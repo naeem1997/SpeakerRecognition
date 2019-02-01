@@ -9,7 +9,7 @@ utilitarian applications as well.
 
 We will be experimenting with three major COTS speaker recognition software:
 Microsoft Azure, Amazon Web Services, and Google Cloud Platform 
-![Azure](https://www.google.com/url?sa=i&source=images&cd=&cad=rja&uact=8&ved=2ahUKEwjDiemhuJvgAhVN-qwKHQLVDOcQjRx6BAgBEAU&url=https%3A%2F%2Fwww.armedia.com%2Fblog%2Fmicrosoft-azure-face-api%2F&psig=AOvVaw0eOgdzjvymFyElnD7j61O0&ust=1549141583092041)
+![Azure](https://www.google.com/search?q=azure+cognitive+services&source=lnms&tbm=isch&sa=X&ved=0ahUKEwiv4YOeuJvgAhUEQK0KHUKaDKcQ_AUIDigB&biw=1920&bih=904#imgrc=JQt9PraoYyWMuM:)
 
 
 
