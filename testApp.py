@@ -6,13 +6,11 @@ import requests
 
 # this function will parse the response from AWS Transcribe
 def getTranscriptionObject():
-    TranscriptionJobObject = status['TranscriptionJob']
-    TranscriptObject = TranscriptionJobObject['Transcript']
-    TranscriptedFileURL = TranscriptObject['TranscriptFileUri']
+    TranscriptedFileURL = status['TranscriptionJob']['Transcript']['TranscriptFileUri']
     print("File Located at:")
     print(TranscriptedFileURL)
     r = requests.get(TranscriptedFileURL, allow_redirects=True)
-    open('transcriptedFileData.txt', 'wb').write(r.content)
+    open('transcriptedFileData.json', 'wb').write(r.content)
 
 
 transcribe = boto3.client('transcribe')
@@ -37,4 +35,3 @@ while True:
   time.sleep(5)
 print(status)
 getTranscriptionObject()
-getTextFromTranscription()
