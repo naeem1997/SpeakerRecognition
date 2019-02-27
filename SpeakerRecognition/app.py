@@ -3,29 +3,36 @@ import time
 import boto3
 import json
 import requests
+import testParse
 
 # this function will parse the response from AWS Transcribe
 def getTranscriptionObject():
     TranscriptedFileURL = status['TranscriptionJob']['Transcript']['TranscriptFileUri']
-    print("File Located at:")
+    print("\n\nFile Located at:")
     print(TranscriptedFileURL)
     r = requests.get(TranscriptedFileURL, allow_redirects=True)
-    open('transcriptedFileData.json', 'wb').write(r.content)
+    open('../Transcripts/transcriptedFileData.json', 'wb').write(r.content)
+    testParse.open_and_parse()
+
 
 
 transcribe = boto3.client('transcribe')
-job_name = "TwoSpeakersTest18"
+job_name = "TwoSpeakersTest25"
 # one speaker:
 # job_uri = "https://s3.us-east-2.amazonaws.com/4485testasr/testAudioFile.mp3"
 # two speakers:
-job_uri = "https://s3.us-east-2.amazonaws.com/4485testasr/twoSpeakers.mp3"
+job_uri = "https://s3.us-east-2.amazonaws.com/4485testasr/liveRecording.wav"
 transcribe.start_transcription_job(
   TranscriptionJobName=job_name,
   Media={'MediaFileUri': job_uri},
-  MediaFormat='mp3',
+  MediaFormat='wav',
   LanguageCode='en-US',
-  Settings={'MaxSpeakerLabels': 2, "ShowSpeakerLabels": True}
+  Settings = {
+            "ChannelIdentification": False,
+            #"MaxSpeakerLabels": 0,
+            #"ShowSpeakerLabels": False
 
+            }
 )
 while True:
   status = transcribe.get_transcription_job(TranscriptionJobName=job_name)
