@@ -15,9 +15,8 @@ def getTranscriptionObject():
     testParse.open_and_parse()
 
 
-
 transcribe = boto3.client('transcribe')
-job_name = "TwoSpeakersTest25"
+job_name = "TwoSpeakersTest27"
 # one speaker:
 # job_uri = "https://s3.us-east-2.amazonaws.com/4485testasr/testAudioFile.mp3"
 # two speakers:

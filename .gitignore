@@ -4,3 +4,9 @@
 *.zip
 
 awscli-bundle/install
+
+*.mp3
+
+*.wav
+
+*.pyc
