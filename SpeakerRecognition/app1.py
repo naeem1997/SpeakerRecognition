@@ -22,7 +22,7 @@ def getRequest(fileURL):
 @app.route('/upload', methods=['GET','POST'])
 def uploadAudioFile():
     transcribe = boto3.client('transcribe')
-    job_name = "TwoSpeakersTest33"
+    job_name = "TwoSpeakersTest34"
     # one speaker:
     # job_uri = "https://s3.us-east-2.amazonaws.com/4485testasr/testAudioFile.mp3"
     # two speakers:
@@ -54,4 +54,5 @@ def uploadAudioFile():
 
 
 if __name__ == '__main__':
+    app.run(host="0.0.0.0", port=80)
     app.run(debug=True)
