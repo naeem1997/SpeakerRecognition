@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title> Test Page Speaker Recognition </title>
+  </head>
+  <body>
+    <h1>Submit Form</h1>
+    {% from "/includes/_formhelpers.html" import render_field %}
+<form method=post>
+  <dl>
+    {{ render_field(form.fileName) }}
+    {{ render_field(form.fileDescription) }}
+  </dl>
+  <p><input type=submit value=Register>
+</form>
+  </body>
+</html>
