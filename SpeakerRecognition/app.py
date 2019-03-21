@@ -1,43 +1,63 @@
 from __future__ import print_function
-import time
-import boto3
-import json
-import requests
-import testParse
+from flask import Flask, json, request, render_template
+from werkzeug.utils import secure_filename
+from UploadForm import UploadForm
+import time, boto3, requests, json, urllib.request, os
 
-# this function will parse the response from AWS Transcribe
-def getTranscriptionObject():
-    TranscriptedFileURL = status['TranscriptionJob']['Transcript']['TranscriptFileUri']
-    print("\n\nFile Located at:")
-    print(TranscriptedFileURL)
-    r = requests.get(TranscriptedFileURL, allow_redirects=True)
-    open('../Transcripts/transcriptedFileData.json', 'wb').write(r.content)
-    testParse.open_and_parse()
+app = Flask('__name__')
+
+@app.route('/', methods=['GET','POST'])
+def index():
+    form = UploadForm(request.form)
+    return render_template('home.html', form=form)
+
+@app.route('/aws')
+def aws():
+    return render_template('aws.html')
 
 
-transcribe = boto3.client('transcribe')
-job_name = "TwoSpeakersTest27"
-# one speaker:
-# job_uri = "https://s3.us-east-2.amazonaws.com/4485testasr/testAudioFile.mp3"
-# two speakers:
-job_uri = "https://s3.us-east-2.amazonaws.com/4485testasr/liveRecording.wav"
-transcribe.start_transcription_job(
-  TranscriptionJobName=job_name,
-  Media={'MediaFileUri': job_uri},
-  MediaFormat='wav',
-  LanguageCode='en-US',
-  Settings = {
-            "ChannelIdentification": False,
-            #"MaxSpeakerLabels": 0,
-            #"ShowSpeakerLabels": False
+def getRequest(fileURL):
 
-            }
-)
-while True:
-  status = transcribe.get_transcription_job(TranscriptionJobName=job_name)
-  if status['TranscriptionJob']['TranscriptionJobStatus'] in ['COMPLETED', 'FAILED']:
-      break
-  print("Not ready yet...")
-  time.sleep(5)
-print(status)
-getTranscriptionObject()
+    transcript = requests.get(fileURL).json()
+    print("Type: " + str(type(transcript)))
+    print("\nThe Transcript: \n  " + transcript['results']['transcripts'][0]['transcript'])
+    return transcript['results']['transcripts'][0]['transcript']
+
+
+@app.route('/upload', methods=['GET','POST'])
+def uploadAudioFile():
+    transcribe = boto3.client('transcribe')
+    job_name = "TwoSpeakersTest35"
+    # one speaker:
+    # job_uri = "https://s3.us-east-2.amazonaws.com/4485testasr/testAudioFile.mp3"
+    # two speakers:
+    # job_uri = "https://s3.us-east-2.amazonaws.com/4485testasr/liveRecording.wav"
+    # transcribe.start_transcription_job(
+    #   TranscriptionJobName=job_name,
+    #   Media={'MediaFileUri': job_uri},
+    #   MediaFormat='wav',
+    #   LanguageCode='en-US',
+    #   Settings = {
+    #             "ChannelIdentification": False,
+    #             #"MaxSpeakerLabels": 0,
+    #             #"ShowSpeakerLabels": False
+    #
+    #             }
+    # )
+    # while True:
+    #   status = transcribe.get_transcription_job(TranscriptionJobName=job_name)
+    #   if status['TranscriptionJob']['TranscriptionJobStatus'] in ['COMPLETED', 'FAILED']:
+    #       break
+    #   print("Not ready yet...")
+    #   time.sleep(5)
+    # print(status)
+    #
+    # TranscriptedFileURL = status['TranscriptionJob']['Transcript']['TranscriptFileUri']
+    # print(TranscriptedFileURL)
+    # transcript = getRequest(TranscriptedFileURL)
+    #
+    return render_template('upload.html')#), transcript = transcript)
+
+
+if __name__ == '__main__':
+    app.run(host="0.0.0.0", port=5000, debug = True)
