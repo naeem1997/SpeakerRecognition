@@ -10,3 +10,5 @@ awscli-bundle/install
 *.wav
 
 *.pyc
+
+SpeakerRecognition/instance/config.py
