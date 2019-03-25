@@ -8,12 +8,14 @@ app = Flask('__name__')
 
 @app.route('/', methods=['GET','POST'])
 def index():
-    form = UploadForm(request.form)
-    return render_template('home.html', form=form)
+    return render_template('home.html')
 
 @app.route('/aws')
 def aws():
-    return render_template('aws.html')
+    form = UploadForm(request.form)
+    if request.method == "POST" and form.validate():
+        return render_template('aws.html', form=form)
+    return render_template('aws.html', form=form)
 
 
 def getRequest(fileURL):
@@ -57,6 +59,8 @@ def uploadAudioFile():
     # transcript = getRequest(TranscriptedFileURL)
     #
     return render_template('upload.html')#), transcript = transcript)
+
+
 
 
 if __name__ == '__main__':
