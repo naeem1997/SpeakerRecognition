@@ -5,6 +5,10 @@ from UploadForm import UploadForm
 import time, boto3, requests, json, urllib.request, os
 from flask_mysqldb import MySQL
 
+ALLOWED_EXTENSIONS = set(['wav'])
+
+
+
 app = Flask('__name__')
 
 app.config.from_pyfile('../config.py')
@@ -20,6 +24,23 @@ def index():
 def aws():
     form = UploadForm(request.form)
     if request.method == "POST" and form.validate():
+        if 'file' not in request.files:
+            flash('No file part', 'danger')
+            return redirect(request.url)
+        file = request.files['file']
+        
+        # if user does not select file, browser also
+        # submit a empty part without filename
+        if file.filename == '':
+            flash('No selected file', 'danger')
+            return redirect(request.url)
+
+        #the actual filename from the uploaded file
+            filename = secure_filename(file.filename)
+
+
+
+
         userName = form.userName.data
 
         # MySQL cursor to execute commands
