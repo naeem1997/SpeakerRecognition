@@ -14,3 +14,7 @@ awscli-bundle/install
 SpeakerRecognition/instance/config.py
 
 config.py
+
+env/
+source/
+bin/
