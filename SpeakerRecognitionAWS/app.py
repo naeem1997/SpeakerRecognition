@@ -67,8 +67,6 @@ def aws():
         # the file is stored here
         file = request.files['file']
 
-        print("here 5")
-
         # if user does not select file, browser also
         # submit a empty part without filename
         if file.filename == '':
@@ -78,20 +76,28 @@ def aws():
         if file and allowed_file(file.filename):
             # All submitted form data can be forged, and filenames can be dangerous.
             # Secure them before adding to filesystem
-            filename = secure_filename(file.filename)
+            fileName = secure_filename(file.filename)
             fileContentType = file.content_type
 
             #the actual filename from the uploaded file
-            print("Filename: " + filename)
+            print("Filename: " + fileName)
             print("fileContentType: " + fileContentType)
             userName = form.userName.data
+            fileDescription = form.fileDescription.data
             print("userName: " + userName)
             #return redirect(url_for('uploadAudioFile', filename=filename))
 
             # Temporary - replace with a SQL query and do an s3id++ to increment id value by 1
             # Format to Create ID and store in MySQL: "S3_xxxxxx"
-            fileURL = str(upload_file_to_s3(file, filename, acl="private"))
+            fileURL = str(upload_file_to_s3(file, fileName, acl="private"))
             print(fileURL)
+            # transcript = uploadAudioFile(fileURL, fileName, fileContentType)
+
+            transcriptData = {}
+            # transcriptData["transcript"] = transcript
+            transcriptData["fileName"] = fileName
+            transcriptData["fileDescription"] = fileDescription
+            transcriptData["userName"] = userName
 
             # MySQL cursor to execute commands
             # Compatable with the flaskext.mysql module
@@ -109,8 +115,10 @@ def aws():
                 # Close connection cursor
                 cur.close()
 
-            return redirect(url_for('index'))
-    return render_template('aws.html', form=form)
+            return(render_template('transcript.html', transcriptData=transcriptData))
+        return(render_template('aws.html', form=form))
+    return(render_template('aws.html', form=form))
+
 
 
 def getRequest(fileURL):
@@ -119,40 +127,6 @@ def getRequest(fileURL):
     print("\nThe Transcript: \n  " + transcript['results']['transcripts'][0]['transcript'])
     return transcript['results']['transcripts'][0]['transcript']
 
-
-@app.route('/upload', methods=['GET', 'POST'])
-def uploadAudioFile():
-    transcribe = boto3.client('transcribe')
-    job_name = "TwoSpeakersTest35"
-    # one speaker:
-    # job_uri = "https://s3.us-east-2.amazonaws.com/4485testasr/testAudioFile.mp3"
-    # two speakers:
-    # job_uri = "https://s3.us-east-2.amazonaws.com/4485testasr/liveRecording.wav"
-    # transcribe.start_transcription_job(
-    #   TranscriptionJobName=job_name,
-    #   Media={'MediaFileUri': job_uri},
-    #   MediaFormat='wav',
-    #   LanguageCode='en-US',
-    #   Settings = {
-    #             "ChannelIdentification": False,
-    #             #"MaxSpeakerLabels": 0,
-    #             #"ShowSpeakerLabels": False
-    #
-    #             }
-    # )
-    # while True:
-    #   status = transcribe.get_transcription_job(TranscriptionJobName=job_name)
-    #   if status['TranscriptionJob']['TranscriptionJobStatus'] in ['COMPLETED', 'FAILED']:
-    #       break
-    #   print("Not ready yet...")
-    #   time.sleep(5)
-    # print(status)
-    #
-    # TranscriptedFileURL = status['TranscriptionJob']['Transcript']['TranscriptFileUri']
-    # print(TranscriptedFileURL)
-    # transcript = getRequest(TranscriptedFileURL)
-    #
-    return render_template('upload.html')#), transcript = transcript)
 
 if __name__ == '__main__':
     app.secret_key = 'itsNotASecretIfItsInVersionControl' # TODO: Figure out how to put this in the config file
