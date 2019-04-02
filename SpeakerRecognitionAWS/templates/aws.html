@@ -10,7 +10,7 @@
 
         {% from 'includes/_formhelpers.html' import render_field %}
 </div>
-        <form method="post" action="">
+        <form method=post enctype=multipart/form-data>
           <div class="form-group">
             {{render_field(form.userName, class_="form-control")}}
           </div>
