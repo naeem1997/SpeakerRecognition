@@ -1,0 +1,31 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+
+<p><p><p><p><p><p><p><p><p><p><p><p>
+<div class="jumbotron">
+  <div class="container">
+    <div class="container">
+      <p> Username:
+        {{ transcriptData['userName'] }}
+      </p>
+    </div>
+    <div class="container">
+      <p> Filename:
+        {{ transcriptData['fileName'] }}
+      </p>
+    </div>
+    <div class="container">
+      <p> File Description:
+        {{ transcriptData['fileDescription'] }}
+      </p>
+    </div>
+    <div class="container">
+      <p> Transcript:
+        {{ transcriptData['transcript'] }}
+      </p>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
