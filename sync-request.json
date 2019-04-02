@@ -1,0 +1,11 @@
+{
+  "config": {
+      "encoding":"FLAC",
+      "sampleRateHertz": 16000,
+      "languageCode": "en-US",
+      "enableWordTimeOffsets": false
+  },
+  "audio": {
+      "uri":"dnc-2004-speech.mp3"
+  }
+}"https://speech.googleapis.com/v1/speech:longrunningrecognize"
