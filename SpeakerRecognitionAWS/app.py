@@ -91,10 +91,10 @@ def aws():
             # Format to Create ID and store in MySQL: "S3_xxxxxx"
             fileURL = str(upload_file_to_s3(file, fileName, acl="private"))
             print(fileURL)
-            # transcript = uploadAudioFile(fileURL, fileName, fileContentType)
+            transcript = uploadAudioFile(fileURL, fileName, fileContentType)
 
             transcriptData = {}
-            # transcriptData["transcript"] = transcript
+            transcriptData["transcript"] = transcript
             transcriptData["fileName"] = fileName
             transcriptData["fileDescription"] = fileDescription
             transcriptData["userName"] = userName
@@ -127,6 +127,44 @@ def getRequest(fileURL):
     print("\nThe Transcript: \n  " + transcript['results']['transcripts'][0]['transcript'])
     return transcript['results']['transcripts'][0]['transcript']
 
+
+def uploadAudioFile(objectFileURL, fileName, fileContentType):
+    #Create the transcribe client
+    transcribe = boto3.client('transcribe')
+
+    try:
+        transcribe.start_transcription_job(
+          TranscriptionJobName = fileName,
+          Media={'MediaFileUri': objectFileURL},
+          MediaFormat=fileContentType[-3:], #get the last 3 characters which is the media type: mp3, wav
+          LanguageCode='en-US',
+          Settings = {
+          # TODO: Make Radio Buttons for these and turn into variables like above
+                    "ChannelIdentification": False,
+                    #"MaxSpeakerLabels": 0,
+                    #"ShowSpeakerLabels": False
+                    }
+          )
+
+        while True:
+          status = transcribe.get_transcription_job(TranscriptionJobName=fileName)
+          if status['TranscriptionJob']['TranscriptionJobStatus'] in ['COMPLETED', 'FAILED']:
+              break
+          print("Not ready yet...")
+          time.sleep(5)
+        print(status)
+    except:
+        # Job Name already exists, overwrite it
+        # Job Names are based off of the filenames in S3
+        response = transcribe.delete_transcription_job(TranscriptionJobName=fileName)
+        return uploadAudioFile(objectFileURL, fileName, fileContentType)
+
+    TranscriptedFileURL = status['TranscriptionJob']['Transcript']['TranscriptFileUri']
+    print(TranscriptedFileURL)
+    transcript = getRequest(TranscriptedFileURL)
+    print(transcript)
+
+    return transcript
 
 if __name__ == '__main__':
     app.secret_key = 'itsNotASecretIfItsInVersionControl' # TODO: Figure out how to put this in the config file
