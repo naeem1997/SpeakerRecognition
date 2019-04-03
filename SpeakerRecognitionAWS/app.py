@@ -33,6 +33,12 @@ def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
+def string_to_boolean(stringValue):
+    if stringValue == 'True':
+        return True
+    else:
+        return False
+
 
 def upload_file_to_s3(file, filename, acl):
 
@@ -77,13 +83,25 @@ def aws():
             # All submitted form data can be forged, and filenames can be dangerous.
             # Secure them before adding to filesystem
             fileName = secure_filename(file.filename)
+            # gets the audio/mp3 or audio/wav description
             fileContentType = file.content_type
 
             #the actual filename from the uploaded file
             print("Filename: " + fileName)
             print("fileContentType: " + fileContentType)
+            # User must add thier username to make a transcription
             userName = form.userName.data
+            # User can add a note when uploading the file
             fileDescription = form.fileDescription.data
+            # Will return true of false - if user wants 1 or many users transcribed
+            multipleSpeakersBoolean = form.multipleSpeakersRadioButton.data
+            numberOfSpeakersInteger = form.numberOfSpeakersField.data
+            multipleChannelsBoolean = form.multipleChannelsRadioButton.data
+
+            # Convert String value to Bool value
+            multipleSpeakersBoolean = string_to_boolean(multipleSpeakersBoolean)
+            multipleChannelsBoolean = string_to_boolean(multipleChannelsBoolean)
+
             print("userName: " + userName)
             #return redirect(url_for('uploadAudioFile', filename=filename))
 
@@ -91,13 +109,19 @@ def aws():
             # Format to Create ID and store in MySQL: "S3_xxxxxx"
             fileURL = str(upload_file_to_s3(file, fileName, acl="private"))
             print(fileURL)
-            transcript = uploadAudioFile(fileURL, fileName, fileContentType)
+
+            transcript = uploadAudioFile(fileURL, fileName, fileContentType, multipleSpeakersBoolean, numberOfSpeakersInteger, multipleChannelsBoolean)
 
             transcriptData = {}
             transcriptData["transcript"] = transcript
             transcriptData["fileName"] = fileName
+            transcriptData["fileURL"] = fileURL
+            transcriptData["fileContentType"] = fileContentType
             transcriptData["fileDescription"] = fileDescription
             transcriptData["userName"] = userName
+            transcriptData["multipleSpeakersBoolean"] = multipleSpeakersBoolean
+            transcriptData["numberOfSpeakersInteger"] = numberOfSpeakersInteger
+            transcriptData["multipleChannelsBoolean"] = multipleChannelsBoolean
 
             # MySQL cursor to execute commands
             # Compatable with the flaskext.mysql module
@@ -128,10 +152,11 @@ def getRequest(fileURL):
     return transcript['results']['transcripts'][0]['transcript']
 
 
-def uploadAudioFile(objectFileURL, fileName, fileContentType):
+def uploadAudioFile(objectFileURL, fileName, fileContentType, multipleSpeakersBoolean, numberOfSpeakers, multipleChannelsBoolean):
     #Create the transcribe client
     transcribe = boto3.client('transcribe')
 
+    # ShowSpeakerLabels must be turned on along with a valid int in MaxSpeakerLabels if speaker recognition is on
     try:
         transcribe.start_transcription_job(
           TranscriptionJobName = fileName,
@@ -139,13 +164,11 @@ def uploadAudioFile(objectFileURL, fileName, fileContentType):
           MediaFormat=fileContentType[-3:], #get the last 3 characters which is the media type: mp3, wav
           LanguageCode='en-US',
           Settings = {
-          # TODO: Make Radio Buttons for these and turn into variables like above
-                    "ChannelIdentification": False,
-                    #"MaxSpeakerLabels": 0,
-                    #"ShowSpeakerLabels": False
+                    "MaxSpeakerLabels": numberOfSpeakers,
+                    "ShowSpeakerLabels": multipleSpeakersBoolean,
+                    "ChannelIdentification": multipleChannelsBoolean
                     }
           )
-
         while True:
           status = transcribe.get_transcription_job(TranscriptionJobName=fileName)
           if status['TranscriptionJob']['TranscriptionJobStatus'] in ['COMPLETED', 'FAILED']:
@@ -153,16 +176,16 @@ def uploadAudioFile(objectFileURL, fileName, fileContentType):
           print("Not ready yet...")
           time.sleep(5)
         print(status)
+
     except:
-        # Job Name already exists, overwrite it
-        # Job Names are based off of the filenames in S3
-        response = transcribe.delete_transcription_job(TranscriptionJobName=fileName)
-        return uploadAudioFile(objectFileURL, fileName, fileContentType)
+      # Job Name already exists, overwrite it
+      # Job Names are based off of the filenames in S3
+      response = transcribe.delete_transcription_job(TranscriptionJobName=fileName)
+      return uploadAudioFile(objectFileURL, fileName, fileContentType, multipleSpeakersBoolean, numberOfSpeakers, multipleChannelsBoolean)
 
     TranscriptedFileURL = status['TranscriptionJob']['Transcript']['TranscriptFileUri']
     print(TranscriptedFileURL)
     transcript = getRequest(TranscriptedFileURL)
-    print(transcript)
 
     return transcript
 
