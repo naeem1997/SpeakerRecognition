@@ -20,14 +20,25 @@
           <div class="form-group">
             {{render_field(form.fileDescription, class_="form-control")}}
           </div>
+          <div >
+            {{render_field(form.multipleSpeakersRadioButton) }}
+          </div>
+          <div >
+            {{render_field(form.numberOfSpeakersField, class_="form-control")}}
+          </div>
+          <div >
+            {{render_field(form.multipleChannelsRadioButton)}}
+          </div>
           <p><input type=file name=file></p>
           <p><input type="submit" class="btn btn-primary" value="Submit"></p>
         </form>
 
+        <!--
         <div class= "results">
           <h1> Results: </h1>
           <div class="jumbotron">
 
           </div>
         </div>
+        -->
 {% endblock %}
