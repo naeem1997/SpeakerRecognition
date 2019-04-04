@@ -1,0 +1,56 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+
+<p><p><p><p><p><p><p><p><p><p><p><p>
+<div class="jumbotron">
+  <div class="container">
+    <div class="container">
+      <p> Username:
+        {{ transcriptData['userName'] }}
+      </p>
+    </div>
+    <div class="container">
+      <p> Filename:
+        {{ transcriptData['fileName'] }}
+      </p>
+    </div>
+    <div class="container">
+      <p> File URL:
+        {{ transcriptData['fileURL'] }}
+      </p>
+    </div>
+    <div class="container">
+      <p> File Type:
+        {{ transcriptData['fileContentType'] }}
+      </p>
+    </div>
+    <div class="container">
+      <p> File Description:
+        {{ transcriptData['fileDescription'] }}
+      </p>
+    </div>
+    <div class="container">
+      <p> Multiple Speakers:
+        {{ transcriptData['multipleSpeakersBoolean'] }}
+      </p>
+    </div>
+    <div class="container">
+      <p> Number of Speakers:
+        {{ transcriptData['numberOfSpeakersInteger'] }}
+      </p>
+    </div>
+    <div class="container">
+      <p> Multiple Channels:
+        {{ transcriptData['multipleChannelsBoolean'] }}
+      </p>
+    </div>
+    <div class="container">
+      <p> Transcript:
+        {{ transcriptData['transcript'] }}
+      </p>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
