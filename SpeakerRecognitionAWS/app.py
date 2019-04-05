@@ -110,10 +110,15 @@ def aws():
             fileURL = str(upload_file_to_s3(file, fileName, acl="private"))
             print(fileURL)
 
-            transcript = uploadAudioFile(fileURL, fileName, fileContentType, multipleSpeakersBoolean, numberOfSpeakersInteger, multipleChannelsBoolean)
+            TranscriptedFileURL = uploadAudioFile(fileURL, fileName, fileContentType, multipleSpeakersBoolean, numberOfSpeakersInteger, multipleChannelsBoolean)
+            # Pass the JSON response URL and get the SRT format returned
+            transcriptList = json_to_srt(TranscriptedFileURL)
+            # Pass the JSON response URL and get the confidence statistics returned
+            statsList = json_to_stats(TranscriptedFileURL)
 
             transcriptData = {}
-            transcriptData["transcript"] = transcript
+            transcriptData["transcript"] = transcriptList
+            transcriptData["statistics"] = statsList
             transcriptData["fileName"] = fileName
             transcriptData["fileURL"] = fileURL
             transcriptData["fileContentType"] = fileContentType
@@ -145,13 +150,19 @@ def aws():
 
 
 import JsonToSRT
+import JsonToStats
 
-def parseJSON(fileURL):
-    transcript = requests.get(fileURL).json()
-    conversationList = JsonToSRT.convertJsonToSRT(transcript)
+def json_to_srt(fileURL):
+    jsonData = requests.get(fileURL).json()
+    conversationList = JsonToSRT.convertJsonToSRT(jsonData)
     #print("Type: " + str(type(transcript)))
     #print("\nThe Transcript: \n  " + transcript['results']['transcripts'][0]['transcript'])
     return conversationList
+
+def json_to_stats(fileURL):
+    jsonData = requests.get(fileURL).json()
+    statsList = JsonToStats.get_stats_from_json(jsonData)
+    return statsList
 
 
 def uploadAudioFile(objectFileURL, fileName, fileContentType, multipleSpeakersBoolean, numberOfSpeakers, multipleChannelsBoolean):
@@ -186,10 +197,9 @@ def uploadAudioFile(objectFileURL, fileName, fileContentType, multipleSpeakersBo
       return uploadAudioFile(objectFileURL, fileName, fileContentType, multipleSpeakersBoolean, numberOfSpeakers, multipleChannelsBoolean)
 
     TranscriptedFileURL = status['TranscriptionJob']['Transcript']['TranscriptFileUri']
-    print(TranscriptedFileURL)
-    transcript = parseJSON(TranscriptedFileURL)
+    #print(TranscriptedFileURL)
 
-    return transcript
+    return TranscriptedFileURL
 
 if __name__ == '__main__':
     app.secret_key = 'itsNotASecretIfItsInVersionControl' # TODO: Figure out how to put this in the config file
