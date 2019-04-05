@@ -144,12 +144,14 @@ def aws():
     return(render_template('aws.html', form=form))
 
 
+import JsonToSRT
 
-def getRequest(fileURL):
+def parseJSON(fileURL):
     transcript = requests.get(fileURL).json()
-    print("Type: " + str(type(transcript)))
-    print("\nThe Transcript: \n  " + transcript['results']['transcripts'][0]['transcript'])
-    return transcript['results']['transcripts'][0]['transcript']
+    conversationList = JsonToSRT.convertJsonToSRT(transcript)
+    #print("Type: " + str(type(transcript)))
+    #print("\nThe Transcript: \n  " + transcript['results']['transcripts'][0]['transcript'])
+    return conversationList
 
 
 def uploadAudioFile(objectFileURL, fileName, fileContentType, multipleSpeakersBoolean, numberOfSpeakers, multipleChannelsBoolean):
@@ -185,7 +187,7 @@ def uploadAudioFile(objectFileURL, fileName, fileContentType, multipleSpeakersBo
 
     TranscriptedFileURL = status['TranscriptionJob']['Transcript']['TranscriptFileUri']
     print(TranscriptedFileURL)
-    transcript = getRequest(TranscriptedFileURL)
+    transcript = parseJSON(TranscriptedFileURL)
 
     return transcript
 
