@@ -56,22 +56,29 @@
         {% endfor %}
       </p>
     </div>
+</div>
 
-    <div class="container">
-      <table>
-      <th>Accuracy</th>
-      <th>Number of Words</th>
-      <th>Percentage of Words</th>
-      {% for list in transcriptData['statistics'] %}
-          <tr>
+  <div class="container">
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th scope="col">Accuracy</th>
+          <th scope="col">Number of Words</th>
+          <th scope="col">Percentage</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for list in transcriptData['statistics'] %}
+            <tr>
               {% for val in list %}
                   <td>{{val}}</td>
               {% endfor %}
-          </tr>
-      {% endfor %}
-    </table>
-  </div>
+            </tr>
+        {% endfor %}
+      </tbody>
+  </table>
 </div>
+
 
 
 {% endblock %}
