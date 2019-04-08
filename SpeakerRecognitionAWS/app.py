@@ -94,25 +94,31 @@ def aws():
             # User can add a note when uploading the file
             fileDescription = form.fileDescription.data
             # Will return true of false - if user wants 1 or many users transcribed
-            multipleSpeakersBoolean = form.multipleSpeakersRadioButton.data
             numberOfSpeakersInteger = form.numberOfSpeakersField.data
+
+            # If the expects only 0 or 1 speaker in the file, turn off speaker recognition
+            # else - turn on
+            if numberOfSpeakersInteger < 2:
+                multipleSpeakersBoolean = False;
+            else:
+                multipleSpeakersBoolean = True;
+
+            # Determine if users wants to enable Channel Idenfitication
+            # Convert String value from input field to bool value
             multipleChannelsBoolean = form.multipleChannelsRadioButton.data
-
-            # Convert String value to Bool value
-            multipleSpeakersBoolean = string_to_boolean(multipleSpeakersBoolean)
             multipleChannelsBoolean = string_to_boolean(multipleChannelsBoolean)
-
-            print("userName: " + userName)
-            #return redirect(url_for('uploadAudioFile', filename=filename))
 
             # Temporary - replace with a SQL query and do an s3id++ to increment id value by 1
             # Format to Create ID and store in MySQL: "S3_xxxxxx"
+            # Upload the file to S3 and return the location it is stored in
             fileURL = str(upload_file_to_s3(file, fileName, acl="private"))
             print(fileURL)
 
             TranscriptedFileURL = uploadAudioFile(fileURL, fileName, fileContentType, multipleSpeakersBoolean, numberOfSpeakersInteger, multipleChannelsBoolean)
-            # Pass the JSON response URL and get the SRT format returned
-            transcriptList = json_to_srt(TranscriptedFileURL)
+
+            # Pass the JSON response URL and the SpeakerBoolean
+            # to get the SRT format returned
+            transcriptList = json_to_srt(TranscriptedFileURL, multipleSpeakersBoolean)
             # Pass the JSON response URL and get the confidence statistics returned
             statsList = json_to_stats(TranscriptedFileURL)
 
@@ -150,13 +156,22 @@ def aws():
 
 
 import JsonToSRT
+import JsonToSRTMultiChannel
 import JsonToStats
 
-def json_to_srt(fileURL):
+# Convert the hard to read json response to SRT Format
+# This format will allow the user to see who spoke when
+# For more info, reference JsonToSRT.py and JsonToSRTMultiChannel.py
+# The MultiChannel and MultiSpeaker responses are different, so different methods
+#   are needed to parse them
+def json_to_srt(fileURL, multipleSpeakersBoolean):
     jsonData = requests.get(fileURL).json()
-    conversationList = JsonToSRT.convertJsonToSRT(jsonData)
-    #print("Type: " + str(type(transcript)))
-    #print("\nThe Transcript: \n  " + transcript['results']['transcripts'][0]['transcript'])
+
+    if multipleSpeakersBoolean:
+        conversationList = JsonToSRT.convertJsonToSRT(jsonData)
+    else:
+        conversationList = JsonToSRTMultiChannel.convertJsonToSRT(jsonData)
+
     return conversationList
 
 def json_to_stats(fileURL):
@@ -164,10 +179,25 @@ def json_to_stats(fileURL):
     statsList = JsonToStats.get_stats_from_json(jsonData)
     return statsList
 
+def create_settings_object(multipleSpeakersBoolean, numberOfSpeakers):
+    # If there will be multiple Speakers
+    # By AWS Requirments,
+    #   - Max Speaker Label must be between 2 - 10
+    #   - Channel Identifcation must be False
+    #   - Shower Speaker labels must be true
+    if multipleSpeakersBoolean:
+        return   {
+                  "MaxSpeakerLabels": numberOfSpeakers,
+                  "ShowSpeakerLabels": True,
+                  "ChannelIdentification": False
+                  }
+    else:
+        return   { "ChannelIdentification": True }
 
 def uploadAudioFile(objectFileURL, fileName, fileContentType, multipleSpeakersBoolean, numberOfSpeakers, multipleChannelsBoolean):
     #Create the transcribe client
     transcribe = boto3.client('transcribe')
+    customSettings = create_settings_object(multipleSpeakersBoolean, numberOfSpeakers)
 
     # ShowSpeakerLabels must be turned on along with a valid int in MaxSpeakerLabels if speaker recognition is on
     try:
@@ -176,11 +206,7 @@ def uploadAudioFile(objectFileURL, fileName, fileContentType, multipleSpeakersBo
           Media={'MediaFileUri': objectFileURL},
           MediaFormat=fileContentType[-3:], #get the last 3 characters which is the media type: mp3, wav
           LanguageCode='en-US',
-          Settings = {
-                    "MaxSpeakerLabels": numberOfSpeakers,
-                    "ShowSpeakerLabels": multipleSpeakersBoolean,
-                    "ChannelIdentification": multipleChannelsBoolean
-                    }
+          Settings = customSettings
           )
         while True:
           status = transcribe.get_transcription_job(TranscriptionJobName=fileName)
