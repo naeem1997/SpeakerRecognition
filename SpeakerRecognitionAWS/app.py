@@ -65,25 +65,16 @@ def index():
     return render_template('home.html')
 
 def upload_live_audio_to_s3(filename):
-
-    file = open(filename, "rb")
-    #file = file.read()
     try:
-        #s3.meta.client.upload_file(filename, S3_BUCKET, filename)
-        s3.upload_file(filename,S3_BUCKET,filename)
-
-
-        #with open(filename) as f:
-        #    s3.send_file(f)
-        # #s3.upload_file(
-        #     filename,
-        #     S3_BUCKET,
-        #     filename, #this will be the route the file is stored in -> myS3Bucket/myBucketName/filename
-        #     ExtraArgs={
-        #         "ACL": "private",
-        #         "ContentType": "wav" # audio file will always be wav with live audio
-        #     }
-        # )
+        s3.upload_file(
+            filename,
+            S3_BUCKET,
+            filename, #this will be the route the file is stored in -> myS3Bucket/myBucketName/filename
+            ExtraArgs={
+                "ACL": "private",
+                "ContentType": "wav" # audio file will always be wav with live audio
+            }
+        )
     except Exception as e:
         # This is a catch all exception, edit this part to fit your needs.
         print("Something Happened: ", e)
