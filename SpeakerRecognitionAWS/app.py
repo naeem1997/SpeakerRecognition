@@ -295,17 +295,24 @@ def transcribe_audio_file(objectFileURL, fileName, fileContentType, multipleSpea
           status = transcribe.get_transcription_job(TranscriptionJobName=fileName)
           if status['TranscriptionJob']['TranscriptionJobStatus'] in ['COMPLETED', 'FAILED']:
               break
-          print("Not ready yet...")
+          print("Waiting on AWS Transcribe...")
           time.sleep(5)
         print(status)
 
     except Exception as e:
       # Job Name already exists, overwrite it
       # Job Names are based off of the filenames in S3
-      print("Error: " + str(e))
-      response = transcribe.delete_transcription_job(TranscriptionJobName=fileName)
-      print("Attempted Resolution: " + str(response))
-      return transcribe_audio_file(objectFileURL, fileName, fileContentType, multipleSpeakersBoolean, numberOfSpeakers, multipleChannelsBoolean)
+      if "The requested job name already exists" in str(e):
+          print("Transcription Job name already exists...")
+          print("Overwriting with this job...")
+
+          response = transcribe.delete_transcription_job(TranscriptionJobName=fileName)
+          if "HTTPStatusCode': 200" in str(response):
+              print("Success! I deleted the old transcription job.")
+              print("Rerunning transcription attempt...")
+              return transcribe_audio_file(objectFileURL, fileName, fileContentType, multipleSpeakersBoolean, numberOfSpeakers, multipleChannelsBoolean)
+      else:
+          print("Error!" + str(e))
 
     TranscriptedFileURL = status['TranscriptionJob']['Transcript']['TranscriptFileUri']
     #print(TranscriptedFileURL)
