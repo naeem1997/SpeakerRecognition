@@ -6,9 +6,14 @@
           <h1 class="display-3">SE Senior Design Project, Team 9</h1>
           <p> Sponsored by NTT Data</p>
           <p> Experiment with multiple forms of COTS tools using speaker recognition. Upload audio files or record audio files to recieve a transcript </p>
-          <p><a class="btn btn-primary btn-lg" href="/aws" role="button"> AWS </a></p>
-          <p><a class="btn btn-primary btn-lg" href="#" role="button"> Azure </a></p>
-          <p><a class="btn btn-primary btn-lg" href="#" role="button"> Google </a></p>
+          <p><a class="btn btn-outline-primary"  href="/aws" role="button"> AWS </a></p>
+          <p><a class="btn btn-outline-primary"  href="/record" role="button"> Record From Browser </a></p>
+          <p><a class="btn btn-outline-primary" href="#" role="button"> Azure </a></p>
+          <p><a class="btn btn-outline-primary" href="#" role="button"> Google </a></p>
         </div>
 </div>
+
+<script type=text/javascript>
+  $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+</script>
 {% endblock %}
