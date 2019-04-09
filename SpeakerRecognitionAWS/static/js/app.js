@@ -5,7 +5,7 @@ var gumStream; 						//stream from getUserMedia()
 var rec; 							//Recorder.js object
 var input; 							//MediaStreamAudioSourceNode we'll be recording
 
-// shim for AudioContext when it's not avb. 
+// shim for AudioContext when it's not avb.
 var AudioContext = window.AudioContext || window.webkitAudioContext;
 var audioContext //audio context to help us record
 
@@ -48,6 +48,7 @@ function startRecording() {
 			create an audio context after getUserMedia is called
 			sampleRate might change after getUserMedia is called, like it does on macOS when recording through AirPods
 			the sampleRate defaults to the one set in your OS for your playback device
+
 		*/
 		audioContext = new AudioContext();
 
@@ -112,10 +113,19 @@ function stopRecording() {
 
 	//create the wav blob and pass it on to createDownloadLink
 	rec.exportWAV(createDownloadLink);
+	rec.exportWAV(sendData);
+
+}
+
+function sendData(blob) {
+	// sends data to flask url /messages as a post with data blob - in format for wav file, hopefully. it is a promise
+	fetch("/liveaudio",{
+	method: "post",
+	body: blob
+	});
 }
 
 function createDownloadLink(blob) {
-
 	var url = URL.createObjectURL(blob);
 	var au = document.createElement('audio');
 	var li = document.createElement('li');
@@ -144,7 +154,7 @@ function createDownloadLink(blob) {
 
 	//upload link
 	var upload = document.createElement('a');
-	upload.href="#";
+	upload.href="http://localhost:5000/liveaudio"
 	upload.innerHTML = "Upload";
 	upload.addEventListener("click", function(event){
 		  var xhr=new XMLHttpRequest();
@@ -153,14 +163,17 @@ function createDownloadLink(blob) {
 		          console.log("Server returned: ",e.target.responseText);
 		      }
 		  };
-		  var fd=new FormData();
-		  fd.append("audio_data",blob, filename);
-		  xhr.open("POST","upload.php",true);
+		  var fd = new FormData();
+		  fd.append("fileData", blob, filename);
+			fd.append("fileName", "theFileName");
+		  xhr.open("POST","app.py/liveaudio");
 		  xhr.send(fd);
 	})
+
 	li.appendChild(document.createTextNode (" "))//add a space in between
 	li.appendChild(upload)//add the upload link to li
 
 	//add the li element to the ol
 	recordingsList.appendChild(li);
+
 }
