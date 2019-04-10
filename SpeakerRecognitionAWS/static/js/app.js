@@ -113,17 +113,9 @@ function stopRecording() {
 
 	//create the wav blob and pass it on to createDownloadLink
 	rec.exportWAV(createDownloadLink);
-	rec.exportWAV(sendData);
-
 }
 
-function sendData(blob) {
-	// sends data to flask url /messages as a post with data blob - in format for wav file, hopefully. it is a promise
-	fetch("/liveaudio",{
-	method: "post",
-	body: blob
-	});
-}
+
 
 function createDownloadLink(blob) {
 	var url = URL.createObjectURL(blob);
@@ -152,22 +144,34 @@ function createDownloadLink(blob) {
 	//add the save to disk link to li
 	li.appendChild(link);
 
+
 	//upload link
 	var upload = document.createElement('a');
 	upload.href="http://localhost:5000/liveaudio"
 	upload.innerHTML = "Upload";
 	upload.addEventListener("click", function(event){
-		  var xhr=new XMLHttpRequest();
-		  xhr.onload=function(e) {
-		      if(this.readyState === 4) {
-		          console.log("Server returned: ",e.target.responseText);
-		      }
-		  };
-		  var fd = new FormData();
-		  fd.append("fileData", blob, filename);
-			fd.append("fileName", "theFileName");
-		  xhr.open("POST","app.py/liveaudio");
-		  xhr.send(fd);
+		filename = document.getElementById("filename").value;
+		username = document.getElementById("username").value;
+		fileDescription = document.getElementById("fileDescription").value;
+		numberOfSpeakersField = document.getElementById("numberOfSpeakersField").value;
+		multipleChannelsRadioButton = document.getElementById("multipleChannelsRadioButton").value;
+		var recording = new Blob([blob], { type: "audio/wav" });
+		var fd = new FormData();
+		fd.append('fileName', filename);
+		fd.append('username', username);
+		fd.append('fileDescription', fileDescription);
+		fd.append('numberOfSpeakersField', numberOfSpeakersField);
+		fd.append('multipleChannelsRadioButton', multipleChannelsRadioButton);
+		fd.append("data", blob);
+		$.ajax({
+		    type: 'POST',
+		    url: '/liveaudio',
+		    data: fd,
+		    processData: false,
+		    contentType: false
+		});
+
+
 	})
 
 	li.appendChild(document.createTextNode (" "))//add a space in between
