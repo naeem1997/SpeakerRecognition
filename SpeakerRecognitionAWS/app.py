@@ -11,6 +11,10 @@ import boto3, botocore
 from config import S3_KEY, S3_SECRET, S3_BUCKET, S3_LOCATION
 from flask_cors import CORS, cross_origin
 
+from werkzeug.datastructures import ImmutableMultiDict
+import io
+
+
 s3 = boto3.client(
    "s3",
    #aws_access_key_id = S3_KEY,
@@ -81,54 +85,83 @@ def upload_live_audio_to_s3(filename):
         return e
     return "{}{}".format(S3_LOCATION, filename)
 
-from werkzeug.datastructures import ImmutableMultiDict
-import io
+def copy_filelike_to_filelike(src, dst, bufsize=16384):
+    while True:
+        buf = src.read(bufsize)
+        if not buf:
+            break
+        dst.write(buf)
+
+
+# Global Var...
+# I'm so sorry...
+# I tried and tried, I couldnt get it to work without it
+# Please help
+transcriptData = {}
+
 
 @app.route('/liveaudio', methods=['GET', 'POST'])
 def liveaudio():
     if request.method == "POST":
         try:
-            f = open('./file.wav', 'wb')
-            f.write(request.data)
-            f.close()
+            print("I should go first")
+            filename = str(request.form['fileName'])
+            username = str(request.form['username'])
+            fileDescription = str(request.form['fileDescription'])
+            numberOfSpeakersInteger = int(request.form['numberOfSpeakersField'])
+            # Not working yet:
+            #multipleChannelsRadioButton = str(request.form['multipleChannelsRadioButton'])
+            multipleChannelsBoolean = False
+            fileContentType = "wav"
 
-            # This should work: but it doesnt...
-            #print("get ready")
-            #print(str(request.values.get('filename')))
+            #print("Data: " + str(request.form.get('data')))
+            #f = open('./file.wav', 'wb')
+            #f.write(request.files.get('data'))
+            #f.close()
+            #request.files.get('data'))
+            file = io.BytesIO(request.files.get('data').read())
+            filename = filename + ".wav"
+            #fileLocation = "./audiofiles/" + filename
+            f = open(filename, 'wb')
+            copy_filelike_to_filelike(file, f)
+            #f.close()
 
-            filename = "file.wav"
+            if numberOfSpeakersInteger < 2:
+                multipleSpeakersBoolean = False;
+            else:
+                multipleSpeakersBoolean = True;
+
             fileURL = str(upload_live_audio_to_s3(filename))
-            # TranscriptedFileURL = transcribe_audio_file(fileURL, filename, fileContentType, multipleSpeakersBoolean, numberOfSpeakersInteger, multipleChannelsBoolean)
-            TranscriptedFileURL = transcribe_audio_file(fileURL, filename, "wav", False, 1, False)
+            TranscriptedFileURL = transcribe_audio_file(fileURL, filename, fileContentType, multipleSpeakersBoolean, numberOfSpeakersInteger, multipleChannelsBoolean)
 
             # Pass the JSON response URL and the SpeakerBoolean
             # to get the SRT format returned
             # transcriptList = json_to_srt(TranscriptedFileURL, multipleSpeakersBoolean)
-            transcriptList = json_to_srt(TranscriptedFileURL, False)
+            transcriptList = json_to_srt(TranscriptedFileURL, False, False)
+
             # Pass the JSON response URL and get the confidence statistics returned
             statsList = json_to_stats(TranscriptedFileURL)
-            fileDescription = "A live recording"
 
 
-            transcriptData = {}
+
+
+
             transcriptData["transcript"] = transcriptList
             transcriptData["statistics"] = statsList
             transcriptData["fileName"] = filename
             transcriptData["fileURL"] = fileURL
             transcriptData["fileContentType"] = "wav"
             transcriptData["fileDescription"] = fileDescription
-            transcriptData["userName"] = "LiveTranscriptUser"
+            transcriptData["userName"] = username
             transcriptData["multipleSpeakersBoolean"] = False
-            transcriptData["numberOfSpeakersInteger"] = 1
+            transcriptData["numberOfSpeakersInteger"] = numberOfSpeakersInteger
             transcriptData["multipleChannelsBoolean"] = False
-            return(render_template('transcript.html', transcriptData=transcriptData))
+            print(" ******** Do I get here? 4")
         except Exception as e:
-            print(e)
-    #form = UploadForm(request.form)
-    #return(render_template('record.html', form = form))
-    form = UploadForm(request.form)
-    return(render_template('record.html', form=form))
-    #return render_template('liveAudio.html')
+            print("Error in live audio method" + str(e))
+    if request.method == "GET":
+        print("I should go second")
+        return(render_template('transcript.html', transcriptData=transcriptData))
 
 @app.route("/record", methods=['GET', 'POST'])
 def record():
@@ -192,7 +225,7 @@ def aws():
 
             # Pass the JSON response URL and the SpeakerBoolean
             # to get the SRT format returned
-            transcriptList = json_to_srt(TranscriptedFileURL, multipleSpeakersBoolean)
+            transcriptList = json_to_srt(TranscriptedFileURL, multipleSpeakersBoolean, multipleChannelsBoolean)
             # Pass the JSON response URL and get the confidence statistics returned
             statsList = json_to_stats(TranscriptedFileURL)
 
@@ -238,15 +271,15 @@ import JsonToStats
 # For more info, reference JsonToSRT.py and JsonToSRTMultiChannel.py
 # The MultiChannel and MultiSpeaker responses are different, so different methods
 #   are needed to parse them
-def json_to_srt(fileURL, multipleSpeakersBoolean):
+def json_to_srt(fileURL, multipleSpeakersBoolean, multipleChannelsBoolean):
     jsonData = requests.get(fileURL).json()
 
     if multipleSpeakersBoolean:
-        conversationList = JsonToSRT.convertJsonToSRT(jsonData)
+        return JsonToSRT.convertJsonToSRT(jsonData)
+    elif multipleChannelsBoolean:
+        return JsonToSRTMultiChannel.convertJsonToSRT(jsonData)
     else:
-        conversationList = JsonToSRTMultiChannel.convertJsonToSRT(jsonData)
-
-    return conversationList
+        return JsonToSRT.convertJsonToSRT_singleSpeaker(jsonData)
 
 def json_to_stats(fileURL):
     jsonData = requests.get(fileURL).json()
@@ -315,7 +348,7 @@ def transcribe_audio_file(objectFileURL, fileName, fileContentType, multipleSpea
           print("Error!" + str(e))
 
     TranscriptedFileURL = status['TranscriptionJob']['Transcript']['TranscriptFileUri']
-    #print(TranscriptedFileURL)
+    
 
     return TranscriptedFileURL
 
