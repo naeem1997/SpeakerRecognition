@@ -5,9 +5,22 @@
 # To do this, the words were cross referenced by time
 # The most confident word was chosen, as per the confidence index
 # --------------------------------------------------------------------
-
 import json, datetime
 from datetime import datetime
+
+def convertJsonToSRT_singleSpeaker(data):
+    spoken_words = []
+    for segment in data['results']['transcripts'][0]['transcript']:
+        spoken_words.append(segment)
+
+    s=""
+    for v in spoken_words:
+         s+=v
+    res=[s]
+    return res
+
+
+
 def convertJsonToSRT(data):
     finalList = []
     #file = "asrOutput2.json"
