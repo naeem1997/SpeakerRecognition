@@ -5,7 +5,7 @@ var gumStream; 						//stream from getUserMedia()
 var rec; 							//Recorder.js object
 var input; 							//MediaStreamAudioSourceNode we'll be recording
 
-// shim for AudioContext when it's not avb. 
+// shim for AudioContext when it's not avb.
 var AudioContext = window.AudioContext || window.webkitAudioContext;
 var audioContext //audio context to help us record
 
@@ -48,6 +48,7 @@ function startRecording() {
 			create an audio context after getUserMedia is called
 			sampleRate might change after getUserMedia is called, like it does on macOS when recording through AirPods
 			the sampleRate defaults to the one set in your OS for your playback device
+
 		*/
 		audioContext = new AudioContext();
 
@@ -114,8 +115,9 @@ function stopRecording() {
 	rec.exportWAV(createDownloadLink);
 }
 
-function createDownloadLink(blob) {
 
+
+function createDownloadLink(blob) {
 	var url = URL.createObjectURL(blob);
 	var au = document.createElement('audio');
 	var li = document.createElement('li');
@@ -142,25 +144,40 @@ function createDownloadLink(blob) {
 	//add the save to disk link to li
 	li.appendChild(link);
 
+
 	//upload link
 	var upload = document.createElement('a');
-	upload.href="#";
+	upload.href="http://localhost:5000/liveaudio"
 	upload.innerHTML = "Upload";
 	upload.addEventListener("click", function(event){
-		  var xhr=new XMLHttpRequest();
-		  xhr.onload=function(e) {
-		      if(this.readyState === 4) {
-		          console.log("Server returned: ",e.target.responseText);
-		      }
-		  };
-		  var fd=new FormData();
-		  fd.append("audio_data",blob, filename);
-		  xhr.open("POST","upload.php",true);
-		  xhr.send(fd);
+		filename = document.getElementById("filename").value;
+		username = document.getElementById("username").value;
+		fileDescription = document.getElementById("fileDescription").value;
+		numberOfSpeakersField = document.getElementById("numberOfSpeakersField").value;
+		multipleChannelsRadioButton = document.getElementById("multipleChannelsRadioButton").value;
+		var recording = new Blob([blob], { type: "audio/wav" });
+		var fd = new FormData();
+		fd.append('fileName', filename);
+		fd.append('username', username);
+		fd.append('fileDescription', fileDescription);
+		fd.append('numberOfSpeakersField', numberOfSpeakersField);
+		fd.append('multipleChannelsRadioButton', multipleChannelsRadioButton);
+		fd.append("data", blob);
+		$.ajax({
+		    type: 'POST',
+		    url: '/liveaudio',
+		    data: fd,
+		    processData: false,
+		    contentType: false
+		});
+
+
 	})
+
 	li.appendChild(document.createTextNode (" "))//add a space in between
 	li.appendChild(upload)//add the upload link to li
 
 	//add the li element to the ol
 	recordingsList.appendChild(li);
+
 }

@@ -45,12 +45,40 @@
         {{ transcriptData['multipleChannelsBoolean'] }}
       </p>
     </div>
-    <div class="container">
-      <p> Transcript:
-        {{ transcriptData['transcript'] }}
-      </p>
-    </div>
   </div>
 </div>
+<p></p>
+<div class="jumbotron">
+    <div class="container">
+      <p> Transcript:
+        {% for sentence in transcriptData['transcript'] %}
+         <ul> {{ sentence }} </ul>
+        {% endfor %}
+      </p>
+    </div>
+</div>
+
+  <div class="container">
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th scope="col">Accuracy</th>
+          <th scope="col">Number of Words</th>
+          <th scope="col">Percentage</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for list in transcriptData['statistics'] %}
+            <tr>
+              {% for val in list %}
+                  <td>{{val}}</td>
+              {% endfor %}
+            </tr>
+        {% endfor %}
+      </tbody>
+  </table>
+</div>
+
+
 
 {% endblock %}

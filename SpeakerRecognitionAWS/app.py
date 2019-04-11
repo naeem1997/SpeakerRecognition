@@ -9,6 +9,11 @@ from flaskext.mysql import MySQL
 import random
 import boto3, botocore
 from config import S3_KEY, S3_SECRET, S3_BUCKET, S3_LOCATION
+from flask_cors import CORS, cross_origin
+
+from werkzeug.datastructures import ImmutableMultiDict
+import io
+
 
 s3 = boto3.client(
    "s3",
@@ -20,6 +25,7 @@ UPLOAD_FOLDER = ''
 ALLOWED_EXTENSIONS = set(['mp3', 'wav'])
 
 app = Flask('__name__')
+CORS(app)
 
 # Initialize MYSQL
 mysql = MySQL(app)
@@ -62,13 +68,114 @@ def upload_file_to_s3(file, filename, acl):
 def index():
     return render_template('home.html')
 
+def upload_live_audio_to_s3(filename):
+    try:
+        s3.upload_file(
+            filename,
+            S3_BUCKET,
+            filename, #this will be the route the file is stored in -> myS3Bucket/myBucketName/filename
+            ExtraArgs={
+                "ACL": "private",
+                "ContentType": "wav" # audio file will always be wav with live audio
+            }
+        )
+    except Exception as e:
+        # This is a catch all exception, edit this part to fit your needs.
+        print("Something Happened: ", e)
+        return e
+    return "{}{}".format(S3_LOCATION, filename)
+
+def copy_filelike_to_filelike(src, dst, bufsize=16384):
+    while True:
+        buf = src.read(bufsize)
+        if not buf:
+            break
+        dst.write(buf)
+
+
+# Global Var...
+# I'm so sorry...
+# I tried and tried, I couldnt get it to work without it
+# Please help
+transcriptData = {}
+
+
+@app.route('/liveaudio', methods=['GET', 'POST'])
+def liveaudio():
+    if request.method == "POST":
+        try:
+            print("I should go first")
+            filename = str(request.form['fileName'])
+            username = str(request.form['username'])
+            fileDescription = str(request.form['fileDescription'])
+            numberOfSpeakersInteger = int(request.form['numberOfSpeakersField'])
+            # Not working yet:
+            #multipleChannelsRadioButton = str(request.form['multipleChannelsRadioButton'])
+            multipleChannelsBoolean = False
+            fileContentType = "wav"
+
+            #print("Data: " + str(request.form.get('data')))
+            #f = open('./file.wav', 'wb')
+            #f.write(request.files.get('data'))
+            #f.close()
+            #request.files.get('data'))
+            file = io.BytesIO(request.files.get('data').read())
+            filename = filename + ".wav"
+            #fileLocation = "./audiofiles/" + filename
+            f = open(filename, 'wb')
+            copy_filelike_to_filelike(file, f)
+            #f.close()
+
+            if numberOfSpeakersInteger < 2:
+                multipleSpeakersBoolean = False;
+            else:
+                multipleSpeakersBoolean = True;
+
+            fileURL = str(upload_live_audio_to_s3(filename))
+            TranscriptedFileURL = transcribe_audio_file(fileURL, filename, fileContentType, multipleSpeakersBoolean, numberOfSpeakersInteger, multipleChannelsBoolean)
+
+            # Pass the JSON response URL and the SpeakerBoolean
+            # to get the SRT format returned
+            # transcriptList = json_to_srt(TranscriptedFileURL, multipleSpeakersBoolean)
+            transcriptList = json_to_srt(TranscriptedFileURL, False, False)
+
+            # Pass the JSON response URL and get the confidence statistics returned
+            statsList = json_to_stats(TranscriptedFileURL)
+
+
+
+
+
+            transcriptData["transcript"] = transcriptList
+            transcriptData["statistics"] = statsList
+            transcriptData["fileName"] = filename
+            transcriptData["fileURL"] = fileURL
+            transcriptData["fileContentType"] = "wav"
+            transcriptData["fileDescription"] = fileDescription
+            transcriptData["userName"] = username
+            transcriptData["multipleSpeakersBoolean"] = False
+            transcriptData["numberOfSpeakersInteger"] = numberOfSpeakersInteger
+            transcriptData["multipleChannelsBoolean"] = False
+            print(" ******** Do I get here? 4")
+        except Exception as e:
+            print("Error in live audio method" + str(e))
+    if request.method == "GET":
+        print("I should go second")
+        return(render_template('transcript.html', transcriptData=transcriptData))
+
+@app.route("/record", methods=['GET', 'POST'])
+def record():
+    form = UploadForm(request.form)
+    return(render_template('record.html', form=form))
+
+
 @app.route('/aws', methods=['GET', 'POST'])
 def aws():
     form = UploadForm(request.form)
     # check if the post request has the file part
     if request.method == "POST" and form.validate():
         if 'file' not in request.files:
-            flash('No file part', 'danger')
+            flash('Missing file!', 'danger')
             return redirect(request.url)
         # the file is stored here
         file = request.files['file']
@@ -94,26 +201,37 @@ def aws():
             # User can add a note when uploading the file
             fileDescription = form.fileDescription.data
             # Will return true of false - if user wants 1 or many users transcribed
-            multipleSpeakersBoolean = form.multipleSpeakersRadioButton.data
             numberOfSpeakersInteger = form.numberOfSpeakersField.data
+
+            # If the expects only 0 or 1 speaker in the file, turn off speaker recognition
+            # else - turn on
+            if numberOfSpeakersInteger < 2:
+                multipleSpeakersBoolean = False;
+            else:
+                multipleSpeakersBoolean = True;
+
+            # Determine if users wants to enable Channel Idenfitication
+            # Convert String value from input field to bool value
             multipleChannelsBoolean = form.multipleChannelsRadioButton.data
-
-            # Convert String value to Bool value
-            multipleSpeakersBoolean = string_to_boolean(multipleSpeakersBoolean)
             multipleChannelsBoolean = string_to_boolean(multipleChannelsBoolean)
-
-            print("userName: " + userName)
-            #return redirect(url_for('uploadAudioFile', filename=filename))
 
             # Temporary - replace with a SQL query and do an s3id++ to increment id value by 1
             # Format to Create ID and store in MySQL: "S3_xxxxxx"
+            # Upload the file to S3 and return the location it is stored in
             fileURL = str(upload_file_to_s3(file, fileName, acl="private"))
             print(fileURL)
 
-            transcript = uploadAudioFile(fileURL, fileName, fileContentType, multipleSpeakersBoolean, numberOfSpeakersInteger, multipleChannelsBoolean)
+            TranscriptedFileURL = transcribe_audio_file(fileURL, fileName, fileContentType, multipleSpeakersBoolean, numberOfSpeakersInteger, multipleChannelsBoolean)
+
+            # Pass the JSON response URL and the SpeakerBoolean
+            # to get the SRT format returned
+            transcriptList = json_to_srt(TranscriptedFileURL, multipleSpeakersBoolean, multipleChannelsBoolean)
+            # Pass the JSON response URL and get the confidence statistics returned
+            statsList = json_to_stats(TranscriptedFileURL)
 
             transcriptData = {}
-            transcriptData["transcript"] = transcript
+            transcriptData["transcript"] = transcriptList
+            transcriptData["statistics"] = statsList
             transcriptData["fileName"] = fileName
             transcriptData["fileURL"] = fileURL
             transcriptData["fileContentType"] = fileContentType
@@ -144,17 +262,58 @@ def aws():
     return(render_template('aws.html', form=form))
 
 
+import JsonToSRT
+import JsonToSRTMultiChannel
+import JsonToStats
 
-def getRequest(fileURL):
-    transcript = requests.get(fileURL).json()
-    print("Type: " + str(type(transcript)))
-    print("\nThe Transcript: \n  " + transcript['results']['transcripts'][0]['transcript'])
-    return transcript['results']['transcripts'][0]['transcript']
+# Convert the hard to read json response to SRT Format
+# This format will allow the user to see who spoke when
+# For more info, reference JsonToSRT.py and JsonToSRTMultiChannel.py
+# The MultiChannel and MultiSpeaker responses are different, so different methods
+#   are needed to parse them
+def json_to_srt(fileURL, multipleSpeakersBoolean, multipleChannelsBoolean):
+    jsonData = requests.get(fileURL).json()
 
+    if multipleSpeakersBoolean:
+        return JsonToSRT.convertJsonToSRT(jsonData)
+    elif multipleChannelsBoolean:
+        return JsonToSRTMultiChannel.convertJsonToSRT(jsonData)
+    else:
+        return JsonToSRT.convertJsonToSRT_singleSpeaker(jsonData)
 
-def uploadAudioFile(objectFileURL, fileName, fileContentType, multipleSpeakersBoolean, numberOfSpeakers, multipleChannelsBoolean):
+def json_to_stats(fileURL):
+    jsonData = requests.get(fileURL).json()
+    statsList = JsonToStats.get_stats_from_json(jsonData)
+    return statsList
+
+def create_settings_object(multipleSpeakersBoolean, numberOfSpeakers, multipleChannelsBoolean):
+    # If there will be multiple Speakers
+    # By AWS Requirments,
+    #   - Max Speaker Label must be between 2 - 10
+    #   - Channel Identifcation must be False
+    #   - Shower Speaker labels must be true
+
+    # If the multiple speakers settings is ON
+    if multipleSpeakersBoolean:
+        return   {
+                  "MaxSpeakerLabels": numberOfSpeakers,
+                  "ShowSpeakerLabels": True,
+                  "ChannelIdentification": False
+                  }
+
+    # If there is just 1 speaker on 1 channel
+    # Leave settings object empty
+    if not multipleSpeakersBoolean and numberOfSpeakers < 2:
+        return { }
+
+    # If the multiple channels settings is ON
+    if multipleChannelsBoolean:
+        return { "ChannelIdentification": True }
+
+def transcribe_audio_file(objectFileURL, fileName, fileContentType, multipleSpeakersBoolean, numberOfSpeakers, multipleChannelsBoolean):
     #Create the transcribe client
     transcribe = boto3.client('transcribe')
+    customSettings = create_settings_object(multipleSpeakersBoolean, numberOfSpeakers, multipleChannelsBoolean)
 
     # ShowSpeakerLabels must be turned on along with a valid int in MaxSpeakerLabels if speaker recognition is on
     try:
@@ -163,31 +322,35 @@ def uploadAudioFile(objectFileURL, fileName, fileContentType, multipleSpeakersBo
           Media={'MediaFileUri': objectFileURL},
           MediaFormat=fileContentType[-3:], #get the last 3 characters which is the media type: mp3, wav
           LanguageCode='en-US',
-          Settings = {
-                    "MaxSpeakerLabels": numberOfSpeakers,
-                    "ShowSpeakerLabels": multipleSpeakersBoolean,
-                    "ChannelIdentification": multipleChannelsBoolean
-                    }
+          Settings = customSettings
           )
         while True:
           status = transcribe.get_transcription_job(TranscriptionJobName=fileName)
           if status['TranscriptionJob']['TranscriptionJobStatus'] in ['COMPLETED', 'FAILED']:
               break
-          print("Not ready yet...")
+          print("Waiting on AWS Transcribe...")
           time.sleep(5)
         print(status)
 
-    except:
+    except Exception as e:
       # Job Name already exists, overwrite it
       # Job Names are based off of the filenames in S3
-      response = transcribe.delete_transcription_job(TranscriptionJobName=fileName)
-      return uploadAudioFile(objectFileURL, fileName, fileContentType, multipleSpeakersBoolean, numberOfSpeakers, multipleChannelsBoolean)
+      if "The requested job name already exists" in str(e):
+          print("Transcription Job name already exists...")
+          print("Overwriting with this job...")
+
+          response = transcribe.delete_transcription_job(TranscriptionJobName=fileName)
+          if "HTTPStatusCode': 200" in str(response):
+              print("Success! I deleted the old transcription job.")
+              print("Rerunning transcription attempt...")
+              return transcribe_audio_file(objectFileURL, fileName, fileContentType, multipleSpeakersBoolean, numberOfSpeakers, multipleChannelsBoolean)
+      else:
+          print("Error!" + str(e))
 
     TranscriptedFileURL = status['TranscriptionJob']['Transcript']['TranscriptFileUri']
-    print(TranscriptedFileURL)
-    transcript = getRequest(TranscriptedFileURL)
+    
 
-    return transcript
+    return TranscriptedFileURL
 
 if __name__ == '__main__':
     app.secret_key = 'itsNotASecretIfItsInVersionControl' # TODO: Figure out how to put this in the config file

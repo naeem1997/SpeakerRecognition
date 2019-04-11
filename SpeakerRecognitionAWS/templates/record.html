@@ -1,0 +1,41 @@
+
+
+{% extends 'layout.html' %}
+{% block body %}
+
+<div class="container-fluid" style="padding-top: 20%">
+<h1>Record your audio file from the browser</h1>
+</div>
+
+{% from 'includes/_formhelpers.html' import render_field %}
+  <div>
+    <form method=post enctype=multipart/form-data>
+      <div class="form-group">
+        {{render_field(form.userName, id="username", class_="form-control")}}
+      </div>
+      <div class="form-group" >
+        {{render_field(form.fileName, id="filename", class_="form-control")}}
+      </div>
+      <div class="form-group">
+        {{render_field(form.fileDescription, id="fileDescription", class_="form-control")}}
+      </div>
+      <div class="form-group">
+        {{render_field(form.numberOfSpeakersField, id="numberOfSpeakersField", class_="form-control")}}
+      </div>
+      <div class="form-check">
+        {{render_field(form.multipleChannelsRadioButton, id="multipleChannelsRadioButton")}}
+      </div>
+      <div id="controls">
+       <button class="btn btn-danger" id="recordButton">Record</button>
+       <button class="btn btn-secondary" id="pauseButton" disabled>Pause</button>
+       <button class="btn btn-secondary" id="stopButton" disabled>Stop</button>
+      </div>
+      <div id="formats">Format: start recording to see sample rate</div>
+      <h3>Recordings</h3>
+      <ol id="recordingsList"></ol>
+
+      <p><input type="submit" class="btn btn-danger btn-lg btn-block" value="Submit"></p>
+    </form>
+  </div>
+
+{% endblock %}
