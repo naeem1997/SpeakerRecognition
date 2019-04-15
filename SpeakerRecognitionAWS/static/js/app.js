@@ -154,7 +154,11 @@ function createDownloadLink(blob) {
 		username = document.getElementById("username").value;
 		fileDescription = document.getElementById("fileDescription").value;
 		numberOfSpeakersField = document.getElementById("numberOfSpeakersField").value;
-		multipleChannelsRadioButton = document.getElementById("multipleChannelsRadioButton").value;
+		var idExists = document.getElementById("multipleChannelsRadioButton");
+		if (!idExists)
+			multipleChannelsRadioButton = true;
+		else
+			multipleChannelsRadioButton = false;
 		var recording = new Blob([blob], { type: "audio/wav" });
 		var fd = new FormData();
 		fd.append('fileName', filename);
