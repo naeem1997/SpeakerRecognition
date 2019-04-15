@@ -135,6 +135,9 @@ def liveaudio():
             transcriptData["multipleSpeakersBoolean"] = False
             transcriptData["numberOfSpeakersInteger"] = numberOfSpeakersInteger
             transcriptData["multipleChannelsBoolean"] = False
+
+            f.close()
+            os.remove(filename)
             print(" ******** Do I get here? 4")
         except Exception as e:
             print("Error in live audio method" + str(e))
