@@ -154,9 +154,17 @@ function createDownloadLink(blob) {
 		username = document.getElementById("username").value;
 		fileDescription = document.getElementById("fileDescription").value;
 		numberOfSpeakersField = document.getElementById("numberOfSpeakersField").value;
+		// Check to see if the radio button exists:
+		// Radio button DNE on Live Audio, Does Exist on File Upload
 		var idExists = document.getElementById("multipleChannelsRadioButton");
+
+		//Check for null, if not null -> get the value
+		// Still could be true of false
+		// For the upload file page
 		if (!idExists)
-			multipleChannelsRadioButton = true;
+			multipleChannelsRadioButton = document.getElementById("multipleChannelsRadioButton").value;
+		// radio button does not exists, therefore we are doing a live recording.
+		// Always False - no multiple channel capabilities yet for Live Recordig
 		else
 			multipleChannelsRadioButton = false;
 		var recording = new Blob([blob], { type: "audio/wav" });
