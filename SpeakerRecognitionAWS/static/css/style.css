@@ -4,3 +4,23 @@
   margin-left: 5%;
   margin-right: 5%;
 }
+
+.audioButtons {
+  margin-left: 2%;
+  margin-right: 2%;
+}
+
+.table-bordered {
+  background-color: white;
+}
+
+#formats {
+  position: relative;
+  padding-top: 3%;
+  padding-bottom: 3%;
+}
+
+html *
+{
+  font-family: 'Roboto', sans-serif;
+}

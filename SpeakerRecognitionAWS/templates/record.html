@@ -3,7 +3,7 @@
 {% extends 'layout.html' %}
 {% block body %}
 
-<div class="container-fluid" style="padding-top: 20%">
+<div class="container-fluid" style="padding-top: 10%">
 <h1>Record your audio file from the browser</h1>
 </div>
 
@@ -27,21 +27,24 @@
        <button class="btn btn-secondary" id="pauseButton" disabled>Pause</button>
        <button class="btn btn-secondary" id="stopButton" disabled>Stop</button>
       </div>
-      <div id="formats">Format: start recording to see sample rate</div>
-      <h3>Recordings</h3>
-      <div class="container">
-        <div class="row">
-          <div class="col-sm">
+      <div id="formats"></div>
+      <table class="table">
+        <thead>
+   <tr>
+     <th scope="col">Recordings</th>
+   </tr>
+ </thead>
+ <tbody>
+   <tr>
+     <td>
             <ol id="recordingsList">
-              <div class="col-sm">
-              </div>
 
             </ol>
-          </div>
-        </div>
-      </div>
+            </td>
+          </tr>
 
-      <p><input type="submit" class="btn btn-danger btn-lg btn-block" value="Submit"></p>
+  </tbody>
+</table>
     </form>
   </div>
 

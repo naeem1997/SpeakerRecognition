@@ -122,7 +122,7 @@ function createDownloadLink(blob) {
 	var au = document.createElement('audio');
 	var li = document.createElement('li');
 	var link = document.createElement('a');
-	au.className = "audioPlayer"
+	au.className = "audioPlayer";
 
 	//name of .wav file to use during upload and download (without extendion)
 	filename = document.getElementById("filename").value;
@@ -136,7 +136,7 @@ function createDownloadLink(blob) {
 	link.href = url;
 	link.download = filename+".wav"; //download forces the browser to donwload the file using the  filename
 	link.innerHTML = "Download";
-	link.className = "btn btn-warning"
+	link.className = "btn btn-warning audioButtons";
 
 	//add the new audio element to li
 	li.appendChild(au);
