@@ -1,19 +1,13 @@
 from __future__ import print_function
-from flask import Flask, json, request, render_template, flash, redirect, url_for
+from flask import Flask, json, request, render_template, flash, redirect, url_for, send_file
 from werkzeug.utils import secure_filename
 from UploadForm import UploadForm
-import time, boto3, requests, json, urllib.request, os
-# Does not work on EC2
-# from flask_mysqldb import MySQL
+import time, boto3, requests, json, urllib.request, os, random, botocore, xlsxwriter, io
 from flaskext.mysql import MySQL
-import random
-import boto3, botocore
 from config import S3_KEY, S3_SECRET, S3_BUCKET, S3_LOCATION
 from flask_cors import CORS, cross_origin
-
 from werkzeug.datastructures import ImmutableMultiDict
-import io
-
+import JsonToSRT, JsonToSRTMultiChannel, JsonToStats, PrintToExcel
 
 s3 = boto3.client(
    "s3",
@@ -39,12 +33,11 @@ def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-def string_to_boolean(stringValue):
-    if stringValue == 'True':
-        return True
-    else:
+def int_to_boolean(intValue):
+    if intValue == 1:
         return False
-
+    else:
+        return True
 
 def upload_file_to_s3(file, filename, acl):
 
@@ -92,14 +85,11 @@ def copy_filelike_to_filelike(src, dst, bufsize=16384):
             break
         dst.write(buf)
 
-
 # Global Var...
 # I'm so sorry...
 # I tried and tried, I couldnt get it to work without it
 # Please help
 transcriptData = {}
-
-
 @app.route('/liveaudio', methods=['GET', 'POST'])
 def liveaudio():
     if request.method == "POST":
@@ -109,41 +99,30 @@ def liveaudio():
             username = str(request.form['username'])
             fileDescription = str(request.form['fileDescription'])
             numberOfSpeakersInteger = int(request.form['numberOfSpeakersField'])
-            # Not working yet:
-            #multipleChannelsRadioButton = str(request.form['multipleChannelsRadioButton'])
             multipleChannelsBoolean = False
             fileContentType = "wav"
 
-            #print("Data: " + str(request.form.get('data')))
-            #f = open('./file.wav', 'wb')
-            #f.write(request.files.get('data'))
-            #f.close()
-            #request.files.get('data'))
             file = io.BytesIO(request.files.get('data').read())
             filename = filename + ".wav"
-            #fileLocation = "./audiofiles/" + filename
             f = open(filename, 'wb')
             copy_filelike_to_filelike(file, f)
-            #f.close()
 
             if numberOfSpeakersInteger < 2:
                 multipleSpeakersBoolean = False;
             else:
                 multipleSpeakersBoolean = True;
 
+            print("HeloOoO?")
+
             fileURL = str(upload_live_audio_to_s3(filename))
             TranscriptedFileURL = transcribe_audio_file(fileURL, filename, fileContentType, multipleSpeakersBoolean, numberOfSpeakersInteger, multipleChannelsBoolean)
 
             # Pass the JSON response URL and the SpeakerBoolean
             # to get the SRT format returned
-            # transcriptList = json_to_srt(TranscriptedFileURL, multipleSpeakersBoolean)
-            transcriptList = json_to_srt(TranscriptedFileURL, False, False)
+            transcriptList = json_to_srt(TranscriptedFileURL, multipleSpeakersBoolean, multipleChannelsBoolean)
 
             # Pass the JSON response URL and get the confidence statistics returned
             statsList = json_to_stats(TranscriptedFileURL)
-
-
-
 
 
             transcriptData["transcript"] = transcriptList
@@ -156,6 +135,9 @@ def liveaudio():
             transcriptData["multipleSpeakersBoolean"] = False
             transcriptData["numberOfSpeakersInteger"] = numberOfSpeakersInteger
             transcriptData["multipleChannelsBoolean"] = False
+
+            f.close()
+            os.remove(filename)
             print(" ******** Do I get here? 4")
         except Exception as e:
             print("Error in live audio method" + str(e))
@@ -167,6 +149,12 @@ def liveaudio():
 def record():
     form = UploadForm(request.form)
     return(render_template('record.html', form=form))
+
+@app.route("/download", methods=['GET', 'POST'])
+def download():
+    return send_file("hello.xlsx", as_attachment=True)
+
+
 
 
 @app.route('/aws', methods=['GET', 'POST'])
@@ -212,8 +200,8 @@ def aws():
 
             # Determine if users wants to enable Channel Idenfitication
             # Convert String value from input field to bool value
-            multipleChannelsBoolean = form.multipleChannelsRadioButton.data
-            multipleChannelsBoolean = string_to_boolean(multipleChannelsBoolean)
+            multipleChannelsBoolean = form.numberOfChannelsField.data
+            multipleChannelsBoolean = int_to_boolean(multipleChannelsBoolean)
 
             # Temporary - replace with a SQL query and do an s3id++ to increment id value by 1
             # Format to Create ID and store in MySQL: "S3_xxxxxx"
@@ -241,6 +229,9 @@ def aws():
             transcriptData["numberOfSpeakersInteger"] = numberOfSpeakersInteger
             transcriptData["multipleChannelsBoolean"] = multipleChannelsBoolean
 
+            PrintToExcel.print_to_excel(transcriptData)
+            #send_from_directory(directory='./', filename="hello.xlsx")
+
             # MySQL cursor to execute commands
             # Compatable with the flaskext.mysql module
             cur = mysql.get_db().cursor()
@@ -261,10 +252,6 @@ def aws():
         return(render_template('aws.html', form=form))
     return(render_template('aws.html', form=form))
 
-
-import JsonToSRT
-import JsonToSRTMultiChannel
-import JsonToStats
 
 # Convert the hard to read json response to SRT Format
 # This format will allow the user to see who spoke when
@@ -348,7 +335,7 @@ def transcribe_audio_file(objectFileURL, fileName, fileContentType, multipleSpea
           print("Error!" + str(e))
 
     TranscriptedFileURL = status['TranscriptionJob']['Transcript']['TranscriptFileUri']
-    
+
 
     return TranscriptedFileURL
 

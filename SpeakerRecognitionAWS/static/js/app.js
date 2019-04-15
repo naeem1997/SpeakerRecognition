@@ -122,9 +122,11 @@ function createDownloadLink(blob) {
 	var au = document.createElement('audio');
 	var li = document.createElement('li');
 	var link = document.createElement('a');
+	au.className = "audioPlayer";
 
 	//name of .wav file to use during upload and download (without extendion)
-	var filename = new Date().toISOString();
+	filename = document.getElementById("filename").value;
+	//var filename = new Date().toISOString();
 
 	//add controls to the <audio> element
 	au.controls = true;
@@ -133,7 +135,8 @@ function createDownloadLink(blob) {
 	//save to disk link
 	link.href = url;
 	link.download = filename+".wav"; //download forces the browser to donwload the file using the  filename
-	link.innerHTML = "Save to disk";
+	link.innerHTML = "Download";
+	link.className = "btn btn-warning audioButtons";
 
 	//add the new audio element to li
 	li.appendChild(au);
@@ -148,13 +151,26 @@ function createDownloadLink(blob) {
 	//upload link
 	var upload = document.createElement('a');
 	upload.href="http://localhost:5000/liveaudio"
-	upload.innerHTML = "Upload";
+	upload.className = "btn btn-danger"
+	upload.innerHTML = "Transcribe";
 	upload.addEventListener("click", function(event){
 		filename = document.getElementById("filename").value;
 		username = document.getElementById("username").value;
 		fileDescription = document.getElementById("fileDescription").value;
 		numberOfSpeakersField = document.getElementById("numberOfSpeakersField").value;
-		multipleChannelsRadioButton = document.getElementById("multipleChannelsRadioButton").value;
+		// Check to see if the radio button exists:
+		// Radio button DNE on Live Audio, Does Exist on File Upload
+		var idExists = document.getElementById("multipleChannelsRadioButton");
+
+		//Check for null, if not null -> get the value
+		// Still could be true of false
+		// For the upload file page
+		if (!idExists)
+			multipleChannelsRadioButton = document.getElementById("multipleChannelsRadioButton").value;
+		// radio button does not exists, therefore we are doing a live recording.
+		// Always False - no multiple channel capabilities yet for Live Recordig
+		else
+			multipleChannelsRadioButton = false;
 		var recording = new Blob([blob], { type: "audio/wav" });
 		var fd = new FormData();
 		fd.append('fileName', filename);

@@ -1,76 +1,84 @@
-* {
-  padding: 0;
-  margin: 0;
-}
-a {
-  color: #337ab7;
-}
-p {
-  margin-top: 1rem;
-}
-a:hover {
-  color:#23527c;
-}
-a:visited {
-  color: #8d75a3;
-}
-body {
-  margin: 1rem;
-  padding: 1rem;
-  font-family: sans-serif;
-  max-width: 28rem;
-  margin: 0 auto;
+.audioPlayer {
   position: relative;
+  top: 17px;
+  margin-left: 5%;
+  margin-right: 5%;
 }
-#controls {
-  display: flex;
-  margin-top: 2rem;
+
+.audioButtons {
+  margin-left: 2%;
+  margin-right: 2%;
 }
-button {
-  flex-grow: 1;
-  height: 2.5rem;
-  min-width: 2rem;
-  border: none;
-  border-radius: 0.15rem;
-  background: #ed341d;
-  margin-left: 2px;
-  box-shadow: inset 0 -0.15rem 0 rgba(0, 0, 0, 0.2);
-  cursor: pointer;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  color:#ffffff;
-  font-weight: bold;
-  font-size: 1rem;
+
+.table-bordered {
+  background-color: white;
 }
-button:hover, button:focus {
-  outline: none;
-  background: #c72d1c;
-}
-button::-moz-focus-inner {
-  border: 0;
-}
-button:active {
-  box-shadow: inset 0 1px 0 rgba(0, 0, 0, 0.2);
-  line-height: 3rem;
-}
-button:disabled {
-  pointer-events: none;
-  background: lightgray;
-}
-button:first-child {
-  margin-left: 0;
-}
-audio {
-  display: block;
-  width: 100%;
-  margin-top: 0.2rem;
-}
-li {
-  list-style: none;
-  margin-bottom: 1rem;
-}
+
 #formats {
-  margin-top: 0.5rem;
-  font-size: 80%;
+  position: relative;
+  padding-top: 3%;
+  padding-bottom: 3%;
+}
+
+html *
+{
+  font-family: 'Roboto', sans-serif;
+}
+
+#howitworks {
+  position: relative;
+  padding-top: 5%;
+  text-align: center;
+  border-style: solid;
+  border-width: 1px 0px 0px 0px;
+
+}
+
+.rowPadding {
+  position: relative;
+  padding-top: 2%;
+
+}
+
+.transcriptionMethodsGroup {
+  position: relative;
+  padding-top: 4%;
+  border-style: solid;
+  border-width: 1px 0px 0px 0px;
+}
+
+.transcriptionMethods {
+  position: relative;
+  padding-top: 4%;
+  padding-bottom: 2%;
+  border-style: solid;
+  border-width: 1px;
+}
+.transcriptionMethodsBottom {
+  position: relative;
+  padding-top: 4%;
+  padding-bottom: 2%;
+  border-style: solid;
+  border-width: 0px 1px 1px 1px;
+}
+
+.jumboForm {
+  color: #525456;
+  padding-top: 10%;
+  background-image: url("https://images.unsplash.com/photo-1528459801416-a9e53bbf4e17?ixlib=rb-1.2.1&auto=format&fit=crop&w=655&q=80");
+  background-size: 100% 100%;
+}
+
+.main  {
+  text-align: center;
+  position: relative;
+  padding-bottom: 40%;
+  background-image: url("https://i.etsystatic.com/8245414/r/il/9b579a/1054777221/il_fullxfull.1054777221_nym4.jpg");
+  background-size: 70%;
+}
+
+.jumbotron-fluid {
+  background-color: white;
+  position: relative;
+  padding-top: 6%;
 }
