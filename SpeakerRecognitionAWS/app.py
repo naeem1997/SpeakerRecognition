@@ -1,19 +1,13 @@
 from __future__ import print_function
-from flask import Flask, json, request, render_template, flash, redirect, url_for
+from flask import Flask, json, request, render_template, flash, redirect, url_for, send_file
 from werkzeug.utils import secure_filename
 from UploadForm import UploadForm
-import time, boto3, requests, json, urllib.request, os
-# Does not work on EC2
-# from flask_mysqldb import MySQL
+import time, boto3, requests, json, urllib.request, os, random, botocore, xlsxwriter, io
 from flaskext.mysql import MySQL
-import random
-import boto3, botocore
 from config import S3_KEY, S3_SECRET, S3_BUCKET, S3_LOCATION
 from flask_cors import CORS, cross_origin
-
 from werkzeug.datastructures import ImmutableMultiDict
-import io
-
+import JsonToSRT, JsonToSRTMultiChannel, JsonToStats, PrintToExcel
 
 s3 = boto3.client(
    "s3",
@@ -44,7 +38,6 @@ def string_to_boolean(stringValue):
         return True
     else:
         return False
-
 
 def upload_file_to_s3(file, filename, acl):
 
@@ -92,7 +85,6 @@ def copy_filelike_to_filelike(src, dst, bufsize=16384):
             break
         dst.write(buf)
 
-
 # Global Var...
 # I'm so sorry...
 # I tried and tried, I couldnt get it to work without it
@@ -131,6 +123,8 @@ def liveaudio():
             else:
                 multipleSpeakersBoolean = True;
 
+            print("HeloOoO?")
+
             fileURL = str(upload_live_audio_to_s3(filename))
             TranscriptedFileURL = transcribe_audio_file(fileURL, filename, fileContentType, multipleSpeakersBoolean, numberOfSpeakersInteger, multipleChannelsBoolean)
 
@@ -141,9 +135,6 @@ def liveaudio():
 
             # Pass the JSON response URL and get the confidence statistics returned
             statsList = json_to_stats(TranscriptedFileURL)
-
-
-
 
 
             transcriptData["transcript"] = transcriptList
@@ -167,6 +158,12 @@ def liveaudio():
 def record():
     form = UploadForm(request.form)
     return(render_template('record.html', form=form))
+
+@app.route("/download", methods=['GET', 'POST'])
+def download():
+    return send_file("hello.xlsx", as_attachment=True)
+
+
 
 
 @app.route('/aws', methods=['GET', 'POST'])
@@ -241,6 +238,9 @@ def aws():
             transcriptData["numberOfSpeakersInteger"] = numberOfSpeakersInteger
             transcriptData["multipleChannelsBoolean"] = multipleChannelsBoolean
 
+            PrintToExcel.print_to_excel(transcriptData)
+            #send_from_directory(directory='./', filename="hello.xlsx")
+
             # MySQL cursor to execute commands
             # Compatable with the flaskext.mysql module
             cur = mysql.get_db().cursor()
@@ -261,10 +261,6 @@ def aws():
         return(render_template('aws.html', form=form))
     return(render_template('aws.html', form=form))
 
-
-import JsonToSRT
-import JsonToSRTMultiChannel
-import JsonToStats
 
 # Convert the hard to read json response to SRT Format
 # This format will allow the user to see who spoke when
@@ -348,7 +344,7 @@ def transcribe_audio_file(objectFileURL, fileName, fileContentType, multipleSpea
           print("Error!" + str(e))
 
     TranscriptedFileURL = status['TranscriptionJob']['Transcript']['TranscriptFileUri']
-    
+
 
     return TranscriptedFileURL
 
