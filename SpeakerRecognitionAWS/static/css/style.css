@@ -79,4 +79,6 @@ html *
 
 .jumbotron-fluid {
   background-color: white;
+  position: relative;
+  padding-top: 6%;
 }
