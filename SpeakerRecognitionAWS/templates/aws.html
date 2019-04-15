@@ -2,7 +2,7 @@
 
 
 {% block body %}
-<div class="jumbotron">
+<div class="jumbotron jumboForm">
         <div class="container">
           <h1 class="display-3">AWS Upload</h1>
         </div>
@@ -10,32 +10,46 @@
 
         {% from 'includes/_formhelpers.html' import render_field %}
 </div>
-        <form method=post enctype=multipart/form-data>
-          <div class="form-group">
-            {{render_field(form.userName, class_="form-control")}}
-          </div>
-          <div class="form-group">
-            {{render_field(form.fileName, class_="form-control")}}
-          </div>
-          <div class="form-group">
-            {{render_field(form.fileDescription, class_="form-control")}}
-          </div>
-          <div class="form-group">
-            {{render_field(form.numberOfSpeakersField, class_="form-control")}}
-          </div>
-          <div class="form-check">
-            {{render_field(form.multipleChannelsRadioButton)}}
-          </div>
-          <p><input type=file name=file></p>
-          <p><input type="submit" class="btn btn-primary" value="Submit"></p>
+
+<div class="container form">
+  <form method=post enctype=multipart/form-data>
+  <div class="row">
+  <div class="col">
+    <div class="form-group">
+      {{render_field(form.userName, class_="form-control")}}
+    </div>
+  </div>
+  <div class="col">
+    <div class="form-group">
+      {{render_field(form.fileName, class_="form-control")}}
+    </div>
+  </div>
+  <div class="col">
+    <div class="form-group">
+    {{render_field(form.numberOfSpeakersField, class_="form-control")}}
+    </div>
+  </div>
+  <div class="col">
+    <div class="form-group">
+    {{render_field(form.numberOfChannelsField, class_="form-control")}}
+    </div>
+  </div>
+  <div class="w-100"></div>
+  <div class="col">
+    <div class="form-group">
+      {{render_field(form.fileDescription, class_="form-control")}}
+    </div>
+  </div>
+  <div class="w-100"></div>
+  <div class="col">
+    <p><input type=file name=file></p>
+  </div>
+  <div class="w-100"></div>
+  <div class="col">
+    <p><input type="submit" class="btn btn-warning" value="Submit"></p>
+  </div>
+</div>
         </form>
+</div>
 
-        <!--
-        <div class= "results">
-          <h1> Results: </h1>
-          <div class="jumbotron">
-
-          </div>
-        </div>
-        -->
 {% endblock %}

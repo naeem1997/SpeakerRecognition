@@ -33,11 +33,11 @@ def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-def string_to_boolean(stringValue):
-    if stringValue == 'True':
-        return True
-    else:
+def int_to_boolean(intValue):
+    if intValue == 1:
         return False
+    else:
+        return True
 
 def upload_file_to_s3(file, filename, acl):
 
@@ -197,8 +197,8 @@ def aws():
 
             # Determine if users wants to enable Channel Idenfitication
             # Convert String value from input field to bool value
-            multipleChannelsBoolean = form.multipleChannelsRadioButton.data
-            multipleChannelsBoolean = string_to_boolean(multipleChannelsBoolean)
+            multipleChannelsBoolean = form.numberOfChannelsField.data
+            multipleChannelsBoolean = int_to_boolean(multipleChannelsBoolean)
 
             # Temporary - replace with a SQL query and do an s3id++ to increment id value by 1
             # Format to Create ID and store in MySQL: "S3_xxxxxx"
