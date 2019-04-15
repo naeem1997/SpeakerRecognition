@@ -29,6 +29,8 @@ html *
   position: relative;
   padding-top: 5%;
   text-align: center;
+  border-style: solid;
+  border-width: 1px 0px 0px 0px;
 
 }
 
@@ -37,11 +39,42 @@ html *
   padding-top: 2%;
 
 }
-.main  {
+
+.transcriptionMethodsGroup {
   position: relative;
-  padding-bottom: 30%;
+  padding-top: 4%;
+  border-style: solid;
+  border-width: 1px 0px 0px 0px;
+}
+
+.transcriptionMethods {
+  position: relative;
+  padding-top: 4%;
+  padding-bottom: 2%;
+  border-style: solid;
+  border-width: 1px;
+}
+.transcriptionMethodsBottom {
+  position: relative;
+  padding-top: 4%;
+  padding-bottom: 2%;
+  border-style: solid;
+  border-width: 0px 1px 1px 1px;
+}
+
+.jumboForm {
+  color: #525456;
+  padding-top: 10%;
+  background-image: url("https://images.unsplash.com/photo-1528459801416-a9e53bbf4e17?ixlib=rb-1.2.1&auto=format&fit=crop&w=655&q=80");
+  background-size: 100% 100%;
+}
+
+.main  {
+  text-align: center;
+  position: relative;
+  padding-bottom: 40%;
   background-image: url("https://i.etsystatic.com/8245414/r/il/9b579a/1054777221/il_fullxfull.1054777221_nym4.jpg");
-  background-size: cover;
+  background-size: 70%;
 }
 
 .jumbotron-fluid {
