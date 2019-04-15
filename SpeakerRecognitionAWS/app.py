@@ -90,8 +90,6 @@ def copy_filelike_to_filelike(src, dst, bufsize=16384):
 # I tried and tried, I couldnt get it to work without it
 # Please help
 transcriptData = {}
-
-
 @app.route('/liveaudio', methods=['GET', 'POST'])
 def liveaudio():
     if request.method == "POST":
@@ -101,22 +99,13 @@ def liveaudio():
             username = str(request.form['username'])
             fileDescription = str(request.form['fileDescription'])
             numberOfSpeakersInteger = int(request.form['numberOfSpeakersField'])
-            # Not working yet:
-            #multipleChannelsRadioButton = str(request.form['multipleChannelsRadioButton'])
             multipleChannelsBoolean = False
             fileContentType = "wav"
 
-            #print("Data: " + str(request.form.get('data')))
-            #f = open('./file.wav', 'wb')
-            #f.write(request.files.get('data'))
-            #f.close()
-            #request.files.get('data'))
             file = io.BytesIO(request.files.get('data').read())
             filename = filename + ".wav"
-            #fileLocation = "./audiofiles/" + filename
             f = open(filename, 'wb')
             copy_filelike_to_filelike(file, f)
-            #f.close()
 
             if numberOfSpeakersInteger < 2:
                 multipleSpeakersBoolean = False;
@@ -130,8 +119,7 @@ def liveaudio():
 
             # Pass the JSON response URL and the SpeakerBoolean
             # to get the SRT format returned
-            # transcriptList = json_to_srt(TranscriptedFileURL, multipleSpeakersBoolean)
-            transcriptList = json_to_srt(TranscriptedFileURL, False, False)
+            transcriptList = json_to_srt(TranscriptedFileURL, multipleSpeakersBoolean, multipleChannelsBoolean)
 
             # Pass the JSON response URL and get the confidence statistics returned
             statsList = json_to_stats(TranscriptedFileURL)
