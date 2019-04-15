@@ -1,11 +1,35 @@
 {% extends 'layout.html' %}
 
 {% block body %}
-<div class="jumbotron">
+<div class="jumbotron jumbotron-fluid">
+        <div class="container main">
+          <h1 class="display-3">Speaker Recognition System</h1>
+        </div>
         <div class="container">
-          <h1 class="display-3">SE Senior Design Project, Team 9</h1>
-          <p> Sponsored by NTT Data</p>
+          <h2>Team 9</h2>
+          <h3> Sponsored by NTT Data</h3>
           <p> Experiment with multiple forms of COTS tools using speaker recognition. Upload audio files or record audio files to recieve a transcript </p>
+        </div>
+        <div class="container" id="howitworks">
+          <h2> How it works </h2>
+          <div class="row rowPadding">
+            <div class="col-sm">
+              <h2> - 1 - </h2>
+              <h3> Upload </h3>
+              <p> You can upload or record an audio file into the webpage. </p>
+            </div>
+            <div class="col-sm">
+              <h2> - 2 - </h2>
+              <h3> Data</h3>
+              <p> Fill out a short form to give us more info about your audio file</p>
+            </div>
+            <div class="col-sm">
+              <h2> - 3 - </h2>
+              <h3> Transcribe</h3>
+              <p> Our system will automatically upload and transcribe your audio file for download </p>
+            </div>
+        </div>
+        <div class="container">
           <p><a class="btn btn-outline-primary"  href="/aws" role="button"> AWS </a></p>
           <p><a class="btn btn-outline-primary"  href="/record" role="button"> Record From Browser </a></p>
           <p><a class="btn btn-outline-primary" href="#" role="button"> Azure </a></p>

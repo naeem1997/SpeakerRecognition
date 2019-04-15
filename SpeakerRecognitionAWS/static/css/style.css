@@ -24,3 +24,26 @@ html *
 {
   font-family: 'Roboto', sans-serif;
 }
+
+#howitworks {
+  position: relative;
+  padding-top: 5%;
+  text-align: center;
+
+}
+
+.rowPadding {
+  position: relative;
+  padding-top: 2%;
+
+}
+.main  {
+  position: relative;
+  padding-bottom: 30%;
+  background-image: url("https://i.etsystatic.com/8245414/r/il/9b579a/1054777221/il_fullxfull.1054777221_nym4.jpg");
+  background-size: cover;
+}
+
+.jumbotron-fluid {
+  background-color: white;
+}
