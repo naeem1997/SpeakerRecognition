@@ -261,6 +261,18 @@ def aws():
         return(render_template('aws.html', form=form))
     return(render_template('aws.html', form=form))
 
+@app.route('/azure')
+def azure():
+    return render_template('index.html')
+
+@app.route('/demo.html')
+def demo():
+    return render_template('demo.html')
+
+@app.route('/recorder.js')
+def recorder():
+    return render_template('recorder.js')
+
 
 import JsonToSRT
 import JsonToSRTMultiChannel
