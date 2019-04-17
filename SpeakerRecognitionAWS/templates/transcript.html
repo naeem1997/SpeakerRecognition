@@ -3,6 +3,55 @@
 {% block body %}
 
 <p><p><p><p><p><p><p><p><p><p><p><p>
+
+
+  <div class="container transcriptContainer">
+    <table class="table table-striped">
+      <thead class="thead-primary">
+        <tr>
+          <th scope="col">File Data</th>
+          <th scope="col"></th>
+        </tr>
+      </thead>
+      <tbody>
+            <tr>
+                  <td> Username: </td>
+                  <td> {{ transcriptData['userName'] }} </td>
+            </tr>
+            <tr>
+                  <td> Filename: </td>
+                  <td> {{ transcriptData['fileName'] }} </td>
+            </tr>
+            <tr>
+                  <td> File URL:: </td>
+                  <td> {{transcriptData['fileURL']}} </td>
+            </tr>
+            <tr>
+                  <td> File Type:: </td>
+                  <td> {{transcriptData['fileContentType']}} </td>
+            </tr>
+            <tr>
+                  <td> File Description:: </td>
+                  <td> {{transcriptData['fileDescription']}} </td>
+            </tr>
+            <tr>
+                  <td> Multiple Speakers: </td>
+                  <td> {{transcriptData['multipleSpeakersBoolean']}} </td>
+            </tr>
+            <tr>
+                  <td> Number of Speakers: </td>
+                  <td> {{transcriptData['numberOfSpeakersInteger']}} </td>
+            </tr>
+            <tr>
+                  <td> Multiple Channels: </td>
+                  <td> {{transcriptData['multipleChannelsBoolean']}} </td>
+            </tr>
+      </tbody>
+  </table>
+</div>
+
+
+<!--
 <div class="jumbotron">
   <div class="container">
     <div class="container">
@@ -46,9 +95,27 @@
       </p>
     </div>
   </div>
+</div> -->
+
+<div class="container transcriptContainer">
+  <table class="table table-striped table-hover">
+    <thead>
+      <tr>
+        <th scope="col">Transcript</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for sentence in transcriptData['transcript'] %}
+          <tr>
+                <td> {{ sentence }} </td>
+          </tr>
+      {% endfor %}
+    </tbody>
+  </table>
 </div>
+
 <p></p>
-<div class="jumbotron">
+<!-- <div class="jumbotron">
     <div class="container">
       <p> Transcript:
         {% for sentence in transcriptData['transcript'] %}
@@ -56,10 +123,10 @@
         {% endfor %}
       </p>
     </div>
-</div>
+</div> -->
 
-  <div class="container">
-    <table class="table table-striped">
+  <div class="container transcriptContainer">
+    <table class="table table-striped table-hover">
       <thead>
         <tr>
           <th scope="col">Accuracy</th>
@@ -76,11 +143,13 @@
             </tr>
         {% endfor %}
       </tbody>
-  </table>
+    </table>
+  </div>
+
+
+<div class="container downloadContainer">
+  <td><a href="{{ url_for('download') }}" class="btn btn-lg btn-block downloadButton">Download</a></td>
 </div>
-
-<td><a href="{{ url_for('download') }}" class="btn btn-danger btn-lg btn-block">Download</a></td>
-
 
 
 {% endblock %}

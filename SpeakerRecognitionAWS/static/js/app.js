@@ -136,7 +136,7 @@ function createDownloadLink(blob) {
 	link.href = url;
 	link.download = filename+".wav"; //download forces the browser to donwload the file using the  filename
 	link.innerHTML = "Download";
-	link.className = "btn btn-warning audioButtons";
+	link.className = "btn downloadButton audioButtons";
 
 	//add the new audio element to li
 	li.appendChild(au);

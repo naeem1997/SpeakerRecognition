@@ -40,6 +40,28 @@ html *
 
 }
 
+th {
+    background-color: #637ba0;
+    color: white;
+}
+
+.transcriptContainer {
+  position: relative;
+  padding-top: 5%;
+}
+
+.downloadButton {
+  background-color: #ea9372;
+  color: white;
+}
+
+.downloadContainer {
+  position: relative;
+  padding-top: 5%;
+  padding-bottom: 5%;
+}
+
+
 .transcriptionMethodsGroup {
   position: relative;
   padding-top: 4%;

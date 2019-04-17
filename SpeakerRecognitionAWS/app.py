@@ -2,7 +2,7 @@ from __future__ import print_function
 from flask import Flask, json, request, render_template, flash, redirect, url_for, send_file
 from werkzeug.utils import secure_filename
 from UploadForm import UploadForm
-import time, boto3, requests, json, urllib.request, os, random, botocore, xlsxwriter, io
+import time, boto3, requests, json, urllib.request, os, random, botocore, xlsxwriter, io, datetime
 from flaskext.mysql import MySQL
 from config import S3_KEY, S3_SECRET, S3_BUCKET, S3_LOCATION
 from flask_cors import CORS, cross_origin
@@ -112,8 +112,6 @@ def liveaudio():
             else:
                 multipleSpeakersBoolean = True;
 
-            print("HeloOoO?")
-
             fileURL = str(upload_live_audio_to_s3(filename))
             TranscriptedFileURL = transcribe_audio_file(fileURL, filename, fileContentType, multipleSpeakersBoolean, numberOfSpeakersInteger, multipleChannelsBoolean)
 
@@ -123,7 +121,6 @@ def liveaudio():
 
             # Pass the JSON response URL and get the confidence statistics returned
             statsList = json_to_stats(TranscriptedFileURL)
-
 
             transcriptData["transcript"] = transcriptList
             transcriptData["statistics"] = statsList
@@ -138,7 +135,6 @@ def liveaudio():
 
             f.close()
             os.remove(filename)
-            print(" ******** Do I get here? 4")
         except Exception as e:
             print("Error in live audio method" + str(e))
     if request.method == "GET":
@@ -152,9 +148,7 @@ def record():
 
 @app.route("/download", methods=['GET', 'POST'])
 def download():
-    return send_file("hello.xlsx", as_attachment=True)
-
-
+    return send_file("transcript.xlsx", as_attachment=True)
 
 
 @app.route('/aws', methods=['GET', 'POST'])
@@ -202,15 +196,14 @@ def aws():
             # Convert String value from input field to bool value
             multipleChannelsBoolean = form.numberOfChannelsField.data
             multipleChannelsBoolean = int_to_boolean(multipleChannelsBoolean)
+            currentTime = datetime.datetime.now()
 
             # Temporary - replace with a SQL query and do an s3id++ to increment id value by 1
             # Format to Create ID and store in MySQL: "S3_xxxxxx"
             # Upload the file to S3 and return the location it is stored in
             fileURL = str(upload_file_to_s3(file, fileName, acl="private"))
-            print(fileURL)
-
+            
             TranscriptedFileURL = transcribe_audio_file(fileURL, fileName, fileContentType, multipleSpeakersBoolean, numberOfSpeakersInteger, multipleChannelsBoolean)
-
             # Pass the JSON response URL and the SpeakerBoolean
             # to get the SRT format returned
             transcriptList = json_to_srt(TranscriptedFileURL, multipleSpeakersBoolean, multipleChannelsBoolean)
@@ -230,7 +223,6 @@ def aws():
             transcriptData["multipleChannelsBoolean"] = multipleChannelsBoolean
 
             PrintToExcel.print_to_excel(transcriptData)
-            #send_from_directory(directory='./', filename="hello.xlsx")
 
             # MySQL cursor to execute commands
             # Compatable with the flaskext.mysql module
@@ -238,15 +230,36 @@ def aws():
 
             # Check to see if the user exists already
             result = cur.execute("SELECT * FROM users WHERE username = %s", [userName])
+            print("Result: " + str(result))
 
             # User Does not Exist - so add to DB
             if result == 0:
                 # Execute MySQL
                 cur.execute("INSERT INTO users(username) VALUES (%s)", [userName])
                 # Commit
+
                 mysql.get_db().commit()
                 # Close connection cursor
-                cur.close()
+            # Get the UserID
+            userId = cur.execute("SELECT id FROM users WHERE username = %s", [userName])
+            userId = cur.fetchone()
+
+            cur.execute("INSERT INTO Transcripts(userID) VALUES (%s)", [userId])
+            lastRow = cur.execute("SELECT TranscriptID FROM Transcripts ORDER BY TranscriptID DESC LIMIT 1")
+            lastRow = cur.fetchone()
+            lastRow = lastRow[0]
+
+            cur.execute("UPDATE Transcripts SET filename =  '" + str(fileName) + "' WHERE TranscriptID = '" + str(lastRow) + "'")
+            cur.execute("UPDATE Transcripts SET fileDescription =  '" + str(fileDescription) + "' WHERE TranscriptID = '" + str(lastRow) + "'")
+            cur.execute("UPDATE Transcripts SET transcriptLocation =  '" + str(TranscriptedFileURL) + "' WHERE TranscriptID = '" + str(lastRow) + "'")
+            cur.execute("UPDATE Transcripts SET fileFormat =  '" + str(fileContentType) + "' WHERE TranscriptID = '" + str(lastRow) + "'")
+            cur.execute("UPDATE Transcripts SET fileLocation =  '" + str(fileURL) + "' WHERE TranscriptID = '" + str(lastRow) + "'")
+            cur.execute("UPDATE Transcripts SET numberOfSpeakers =  '" + str(numberOfSpeakersInteger) + "' WHERE TranscriptID = '" + str(lastRow) + "'")
+            cur.execute("UPDATE Transcripts SET channelIdentification =  '" + str(multipleChannelsBoolean) + "' WHERE TranscriptID = '" + str(lastRow) + "'")
+            cur.execute("UPDATE Transcripts SET transcriptionDate =  '" + str(currentTime) + "' WHERE TranscriptID = '" + str(lastRow) + "'")
+
+            mysql.get_db().commit()
+            cur.close()
 
             return(render_template('transcript.html', transcriptData=transcriptData))
         return(render_template('aws.html', form=form))

@@ -1,7 +1,7 @@
 import xlsxwriter
 
 def print_to_excel(transcriptData):
-    workbook = xlsxwriter.Workbook('hello.xlsx')
+    workbook = xlsxwriter.Workbook('transcript.xlsx')
     worksheet = workbook.add_worksheet()
 
     worksheet.write(0, 0, "Username:")
