@@ -13,43 +13,43 @@
 
 <div class="container form">
   <form method=post enctype=multipart/form-data>
-  <div class="row">
-  <div class="col">
-    <div class="form-group">
-      {{render_field(form.userName, class_="form-control")}}
-    </div>
+    <div class="row">
+      <div class="col">
+        <div class="form-group">
+          {{render_field(form.userName, class_="form-control")}}
+        </div>
+      </div>
+      <div class="col">
+        <div class="form-group">
+          {{render_field(form.fileName, class_="form-control")}}
+        </div>
+      </div>
+      <div class="col">
+        <div class="form-group">
+        {{render_field(form.numberOfSpeakersField, class_="form-control")}}
+        </div>
+      </div>
+      <div class="col">
+        <div class="form-group">
+        {{render_field(form.numberOfChannelsField, class_="form-control")}}
+        </div>
+      </div>
+      <div class="w-100"></div>
+      <div class="col">
+        <div class="form-group">
+          {{render_field(form.fileDescription, class_="form-control")}}
+        </div>
+      </div>
+      <div class="w-100"></div>
+      <div class="col">
+        <p><input type=file name=file></p>
+      </div>
+      <div class="w-100"></div>
+      <div class="col">
+        <p><input type="submit" class="btn btn-warning" value="Submit"></p>
+      </div>
   </div>
-  <div class="col">
-    <div class="form-group">
-      {{render_field(form.fileName, class_="form-control")}}
-    </div>
-  </div>
-  <div class="col">
-    <div class="form-group">
-    {{render_field(form.numberOfSpeakersField, class_="form-control")}}
-    </div>
-  </div>
-  <div class="col">
-    <div class="form-group">
-    {{render_field(form.numberOfChannelsField, class_="form-control")}}
-    </div>
-  </div>
-  <div class="w-100"></div>
-  <div class="col">
-    <div class="form-group">
-      {{render_field(form.fileDescription, class_="form-control")}}
-    </div>
-  </div>
-  <div class="w-100"></div>
-  <div class="col">
-    <p><input type=file name=file></p>
-  </div>
-  <div class="w-100"></div>
-  <div class="col">
-    <p><input type="submit" class="btn btn-warning" value="Submit"></p>
-  </div>
-</div>
-        </form>
+  </form>
 </div>
 
 {% endblock %}
