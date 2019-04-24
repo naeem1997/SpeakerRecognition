@@ -7,6 +7,12 @@ addButton.addEventListener("click", addButtonFunction);
 var submitButton = document.getElementById("submitButton");
 submitButton.addEventListener("click", submitButtonFunction);
 
+
+
+//var deleteButton = document.getElementById("deleteButton");
+//deleteButton.addEventListener("click", deleteButtonFunction);
+
+
 counter = 0;
 
 function addButtonFunction() {
@@ -21,8 +27,12 @@ function addButtonFunction() {
 }
 
 function deleteButtonFunction() {
-  $(this).closest("tr").remove();
-  counter -= 1
+
+  //$(this).parents('tr').detach();
+
+
+  //$(this).closest("tr").remove();
+  //counter -= 1
 }
 
 function submitButtonFunction() {
@@ -32,10 +42,10 @@ function submitButtonFunction() {
   var names = [];
   var i;
   var total = counter;
-  for (i = 4; i < (4 + total); i++) {
+  for (i = 5; i < (5 + total); i++) {
     names.push(document.getElementsByTagName("input")[i].value);
   }
-  alert(names);
+  //alert(names);
 
   var fd = new FormData();
   fd.append('names', names);
@@ -46,6 +56,4 @@ function submitButtonFunction() {
       processData: false,
       contentType: false
   });
-
-
 }
