@@ -13,10 +13,13 @@ var recordButton = document.getElementById("recordButton");
 var stopButton = document.getElementById("stopButton");
 var pauseButton = document.getElementById("pauseButton");
 
+
 //add events to those 2 buttons
 recordButton.addEventListener("click", startRecording);
 stopButton.addEventListener("click", stopRecording);
 pauseButton.addEventListener("click", pauseRecording);
+
+
 
 function startRecording() {
 	console.log("recordButton clicked");
@@ -114,8 +117,6 @@ function stopRecording() {
 	//create the wav blob and pass it on to createDownloadLink
 	rec.exportWAV(createDownloadLink);
 }
-
-
 
 function createDownloadLink(blob) {
 	var url = URL.createObjectURL(blob);

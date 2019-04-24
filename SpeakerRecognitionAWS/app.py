@@ -11,8 +11,6 @@ import JsonToSRT, JsonToSRTMultiChannel, JsonToStats, PrintToExcel
 
 s3 = boto3.client(
    "s3",
-   #aws_access_key_id = S3_KEY,
-   #aws_secret_access_key = S3_SECRET
 )
 
 UPLOAD_FOLDER = ''
@@ -84,6 +82,20 @@ def copy_filelike_to_filelike(src, dst, bufsize=16384):
         if not buf:
             break
         dst.write(buf)
+
+namesToTranscribe = []
+@app.route('/postNames', methods=['GET', 'POST'])
+def postNames():
+    if request.method == "POST":
+        list = request.form['names']
+        str = ""
+        for val in list:
+            if val is not ",":
+                str = str + val
+            else:
+                namesToTranscribe.append(str)
+                str = ""
+        namesToTranscribe.append(str)
 
 # Global Var...
 # I'm so sorry...
@@ -202,11 +214,11 @@ def aws():
             # Format to Create ID and store in MySQL: "S3_xxxxxx"
             # Upload the file to S3 and return the location it is stored in
             fileURL = str(upload_file_to_s3(file, fileName, acl="private"))
-            
+
             TranscriptedFileURL = transcribe_audio_file(fileURL, fileName, fileContentType, multipleSpeakersBoolean, numberOfSpeakersInteger, multipleChannelsBoolean)
             # Pass the JSON response URL and the SpeakerBoolean
             # to get the SRT format returned
-            transcriptList = json_to_srt(TranscriptedFileURL, multipleSpeakersBoolean, multipleChannelsBoolean)
+            transcriptList = json_to_srt(TranscriptedFileURL, multipleSpeakersBoolean, multipleChannelsBoolean, namesToTranscribe)
             # Pass the JSON response URL and get the confidence statistics returned
             statsList = json_to_stats(TranscriptedFileURL)
 
@@ -271,11 +283,11 @@ def aws():
 # For more info, reference JsonToSRT.py and JsonToSRTMultiChannel.py
 # The MultiChannel and MultiSpeaker responses are different, so different methods
 #   are needed to parse them
-def json_to_srt(fileURL, multipleSpeakersBoolean, multipleChannelsBoolean):
+def json_to_srt(fileURL, multipleSpeakersBoolean, multipleChannelsBoolean, namesToTranscribe):
     jsonData = requests.get(fileURL).json()
 
     if multipleSpeakersBoolean:
-        return JsonToSRT.convertJsonToSRT(jsonData)
+        return JsonToSRT.convertJsonToSRT(jsonData, namesToTranscribe)
     elif multipleChannelsBoolean:
         return JsonToSRTMultiChannel.convertJsonToSRT(jsonData)
     else:

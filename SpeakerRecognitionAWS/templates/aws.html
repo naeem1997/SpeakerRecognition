@@ -1,6 +1,5 @@
 {% extends 'layout.html' %}
 
-
 {% block body %}
 <div class="jumbotron jumboForm">
         <div class="container">
@@ -42,14 +41,39 @@
       </div>
       <div class="w-100"></div>
       <div class="col">
+        <div class="container">
+          <h2 id="assignSpeaker"> Assign Speakers </h2>
+            <p> <input type="button" class="btn btn-sm addSpeakerButton" id="addrow" value="Add Speaker" /></p>
+          <!--  <p> <input type="button" class="btn btn-sm addSpeakerButton" id="deleteButton" value="Delete Speaker" /></p> -->
+          <table id="myTable" class=" table order-list">
+          <thead>
+              <tr>
+                  <td>Speaker</td>
+                  <td>Name</td>
+              </tr>
+          </thead>
+          <tbody>
+              <tr>
+              </tr>
+          </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="w-100"></div>
+      <div class="col">
         <p><input type=file name=file></p>
       </div>
       <div class="w-100"></div>
       <div class="col">
-        <p><input type="submit" class="btn downloadButton" value="Submit"></p>
+        <p><input type="submit" class="btn downloadButton" id = "submitButton" value="Submit"></p>
       </div>
+
+
+
   </div>
   </form>
 </div>
+
+</form>
 
 {% endblock %}

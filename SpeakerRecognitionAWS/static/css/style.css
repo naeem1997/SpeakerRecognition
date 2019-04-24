@@ -55,6 +55,11 @@ th {
   color: white;
 }
 
+.addSpeakerButton {
+  background-color: #637ba0;
+  color: white;
+}
+
 .downloadContainer {
   position: relative;
   padding-top: 5%;
