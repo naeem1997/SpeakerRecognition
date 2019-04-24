@@ -21,8 +21,19 @@ def convertJsonToSRT_singleSpeaker(data):
     return res
 
 
-def convertJsonToSRT(data):
+def convertJsonToSRT(data, listOfSpeakers):
     finalList = []
+
+    speakersMapping = {}
+
+    count = 0
+    # Map the speaker names entered by user with that in AWS Transcribe
+    for name in listOfSpeakers:
+        # Create a dynamic string based on how many names in list
+        speakerNumber = "spk_" + str(count)
+        speakersMapping[speakerNumber] = name
+        count = count + 1
+
 
     # Each segment begins with:
     #       - the speaker start_time
@@ -40,7 +51,12 @@ def convertJsonToSRT(data):
             # Example -> 77.04 becomes 01:17
             segmentList.append(datetime.fromtimestamp(float(segment['start_time'])).strftime("%M:%S"))
             segmentList.append(" -- ")
-            segmentList.append((str(segment['speaker_label'])))
+
+            # Add the speaker
+
+            convertedSpeaker = speakersMapping[str(segment['speaker_label'])]
+            segmentList.append(convertedSpeaker)
+
             segmentList.append(": ")
 
             # Loop through each word item to get the result
@@ -83,6 +99,8 @@ def convertJsonToSRT(data):
         spokenLine = ""
         for val in segmentList:
             spokenLine += val
+
+
 
         # Check to see if the speaker spoke twice in a row
         # Do this until AWS fixes thier return
