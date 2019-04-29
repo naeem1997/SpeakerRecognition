@@ -273,7 +273,11 @@ def demo():
 def recorder():
     return render_template('recorder.js')
 
+@app.route('/transcribe_azure.html', endpoint = "transcribe_azure.html")
+def transcribe_azure():
+    return render_template('transcribe_azure.html')
 
+    
 import JsonToSRT
 import JsonToSRTMultiChannel
 import JsonToStats
