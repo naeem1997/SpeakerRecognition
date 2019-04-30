@@ -8,11 +8,12 @@
 import json, datetime
 from datetime import datetime
 
+# For single Speakers, there is not "speaker_labels" tags to parse
+# This function simple returns the transcript result from the json
 def convertJsonToSRT_singleSpeaker(data):
     spoken_words = []
     for segment in data['results']['transcripts'][0]['transcript']:
         spoken_words.append(segment)
-
     s=""
     for v in spoken_words:
          s+=v
@@ -20,11 +21,19 @@ def convertJsonToSRT_singleSpeaker(data):
     return res
 
 
-
-def convertJsonToSRT(data):
+def convertJsonToSRT(data, listOfSpeakers):
     finalList = []
-    #file = "asrOutput2.json"
-    #data = json.load(open(file))
+
+    speakersMapping = {}
+
+    count = 0
+    # Map the speaker names entered by user with that in AWS Transcribe
+    for name in listOfSpeakers:
+        # Create a dynamic string based on how many names in list
+        speakerNumber = "spk_" + str(count)
+        speakersMapping[speakerNumber] = name
+        count = count + 1
+
 
     # Each segment begins with:
     #       - the speaker start_time
@@ -36,14 +45,18 @@ def convertJsonToSRT(data):
         if len(segment['items']) > 0:
 
             # Format the begining of each segment
-            #
             segmentList = []
             # Convert AWS time format to datetime format
             # Example -> 3.04 becomes 00:03
             # Example -> 77.04 becomes 01:17
             segmentList.append(datetime.fromtimestamp(float(segment['start_time'])).strftime("%M:%S"))
             segmentList.append(" -- ")
-            segmentList.append((str(segment['speaker_label'])))
+
+            # Add the speaker
+
+            convertedSpeaker = speakersMapping[str(segment['speaker_label'])]
+            segmentList.append(convertedSpeaker)
+
             segmentList.append(": ")
 
             # Loop through each word item to get the result
@@ -82,13 +95,26 @@ def convertJsonToSRT(data):
                                 except:
                                     pass
 
-        segmentList.append("/")
+        # convert the list to a string
         spokenLine = ""
         for val in segmentList:
-            if(val != "/"):
-                spokenLine += val
-            else:
-                finalList.append(spokenLine)
+            spokenLine += val
+
+
+
+        # Check to see if the speaker spoke twice in a row
+        # Do this until AWS fixes thier return
+        if finalList:
+            # if the current utterance was by the same speaker as the previous one
+            # If true, speaker spoke twice with a pause
+            if spokenLine[9:14] in finalList[-1]:
+                # Take the last item in the final List and concatenate it with the words spoken in this utterance
+                # Ignore the timestamp and the speaker label, hence [15:]
+                spokenLine = finalList[-1] + spokenLine[15:]
+                # Delete the old utterance, since it was copied into the current utterance
+                finalList.pop(-1)
+        # add this utterance to the final list
+        finalList.append(spokenLine)
 
     return finalList
 

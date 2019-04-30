@@ -1,16 +1,40 @@
 {% extends 'layout.html' %}
 
 {% block body %}
-<div class="jumbotron">
-        <div class="container">
-          <h1 class="display-3">SE Senior Design Project, Team 9</h1>
-          <p> Sponsored by NTT Data</p>
-          <p> Experiment with multiple forms of COTS tools using speaker recognition. Upload audio files or record audio files to recieve a transcript </p>
-          <p><a class="btn btn-outline-primary"  href="/aws" role="button"> AWS </a></p>
-          <p><a class="btn btn-outline-primary"  href="/record" role="button"> Record From Browser </a></p>
-          <p><a class="btn btn-outline-primary" href="/azure" role="button"> Azure </a></p>
-          <p><a class="btn btn-outline-primary" href="#" role="button"> Google </a></p>
+<div class="jumbotron jumbotron-fluid">
+        <div class="container main">
+          <h1 class="display-3">Speaker Recognition System</h1>
         </div>
+        <div class="container">
+        </div>
+
+        <div class="container transcriptionMethodsGroup">
+          <div class="row">
+            <div class="col transcriptionMethods">
+              <h2> AWS </h2>
+              <p>
+                <a class="btn btn-outline-primary"  href="/aws" role="button"> Upload File </a>
+              <p>
+              <p>
+                  <a class="btn btn-outline-primary"  href="/record" role="button"> Record Live Audio </a>
+              </p>
+            </div>
+            <div class="w-100"></div>
+            <div class="col transcriptionMethodsBottom">
+              <h2> Azure </h2>
+              <p>
+                <a class="btn btn-outline-primary" href="#" role="button"> Transcribe via Azure </a>
+              </p>
+            </div>
+            <div class="col transcriptionMethodsBottom">
+              <h2> Google </h2>
+              <p>
+                <a class="btn btn-outline-primary" href="#" role="button"> Transcribe via Google </a>
+              </p>
+            </div>
+          </div>
+        </div>
+
 </div>
 
 <script type=text/javascript>

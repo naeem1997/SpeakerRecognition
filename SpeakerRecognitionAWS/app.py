@@ -1,24 +1,16 @@
 from __future__ import print_function
-from flask import Flask, json, request, render_template, flash, redirect, url_for
+from flask import Flask, json, request, render_template, flash, redirect, url_for, send_file
 from werkzeug.utils import secure_filename
 from UploadForm import UploadForm
-import time, boto3, requests, json, urllib.request, os
-# Does not work on EC2
-# from flask_mysqldb import MySQL
+import time, boto3, requests, json, urllib.request, os, random, botocore, xlsxwriter, io, datetime
 from flaskext.mysql import MySQL
-import random
-import boto3, botocore
 from config import S3_KEY, S3_SECRET, S3_BUCKET, S3_LOCATION
 from flask_cors import CORS, cross_origin
-
 from werkzeug.datastructures import ImmutableMultiDict
-import io
-
+import JsonToSRT, JsonToSRTMultiChannel, JsonToStats, PrintToExcel
 
 s3 = boto3.client(
    "s3",
-   #aws_access_key_id = S3_KEY,
-   #aws_secret_access_key = S3_SECRET
 )
 
 UPLOAD_FOLDER = ''
@@ -39,12 +31,11 @@ def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-def string_to_boolean(stringValue):
-    if stringValue == 'True':
-        return True
-    else:
+def int_to_boolean(intValue):
+    if intValue == 1:
         return False
-
+    else:
+        return True
 
 def upload_file_to_s3(file, filename, acl):
 
@@ -92,14 +83,25 @@ def copy_filelike_to_filelike(src, dst, bufsize=16384):
             break
         dst.write(buf)
 
+namesToTranscribe = []
+@app.route('/postNames', methods=['GET', 'POST'])
+def postNames():
+    if request.method == "POST":
+        list = request.form['names']
+        str = ""
+        for val in list:
+            if val is not ",":
+                str = str + val
+            else:
+                namesToTranscribe.append(str)
+                str = ""
+        namesToTranscribe.append(str)
 
 # Global Var...
 # I'm so sorry...
 # I tried and tried, I couldnt get it to work without it
 # Please help
 transcriptData = {}
-
-
 @app.route('/liveaudio', methods=['GET', 'POST'])
 def liveaudio():
     if request.method == "POST":
@@ -109,22 +111,13 @@ def liveaudio():
             username = str(request.form['username'])
             fileDescription = str(request.form['fileDescription'])
             numberOfSpeakersInteger = int(request.form['numberOfSpeakersField'])
-            # Not working yet:
-            #multipleChannelsRadioButton = str(request.form['multipleChannelsRadioButton'])
             multipleChannelsBoolean = False
             fileContentType = "wav"
 
-            #print("Data: " + str(request.form.get('data')))
-            #f = open('./file.wav', 'wb')
-            #f.write(request.files.get('data'))
-            #f.close()
-            #request.files.get('data'))
             file = io.BytesIO(request.files.get('data').read())
             filename = filename + ".wav"
-            #fileLocation = "./audiofiles/" + filename
             f = open(filename, 'wb')
             copy_filelike_to_filelike(file, f)
-            #f.close()
 
             if numberOfSpeakersInteger < 2:
                 multipleSpeakersBoolean = False;
@@ -136,15 +129,10 @@ def liveaudio():
 
             # Pass the JSON response URL and the SpeakerBoolean
             # to get the SRT format returned
-            # transcriptList = json_to_srt(TranscriptedFileURL, multipleSpeakersBoolean)
-            transcriptList = json_to_srt(TranscriptedFileURL, False, False)
+            transcriptList = json_to_srt(TranscriptedFileURL, multipleSpeakersBoolean, multipleChannelsBoolean)
 
             # Pass the JSON response URL and get the confidence statistics returned
             statsList = json_to_stats(TranscriptedFileURL)
-
-
-
-
 
             transcriptData["transcript"] = transcriptList
             transcriptData["statistics"] = statsList
@@ -156,7 +144,9 @@ def liveaudio():
             transcriptData["multipleSpeakersBoolean"] = False
             transcriptData["numberOfSpeakersInteger"] = numberOfSpeakersInteger
             transcriptData["multipleChannelsBoolean"] = False
-            print(" ******** Do I get here? 4")
+
+            f.close()
+            os.remove(filename)
         except Exception as e:
             print("Error in live audio method" + str(e))
     if request.method == "GET":
@@ -167,6 +157,10 @@ def liveaudio():
 def record():
     form = UploadForm(request.form)
     return(render_template('record.html', form=form))
+
+@app.route("/download", methods=['GET', 'POST'])
+def download():
+    return send_file("transcript.xlsx", as_attachment=True)
 
 
 @app.route('/aws', methods=['GET', 'POST'])
@@ -212,20 +206,19 @@ def aws():
 
             # Determine if users wants to enable Channel Idenfitication
             # Convert String value from input field to bool value
-            multipleChannelsBoolean = form.multipleChannelsRadioButton.data
-            multipleChannelsBoolean = string_to_boolean(multipleChannelsBoolean)
+            multipleChannelsBoolean = form.numberOfChannelsField.data
+            multipleChannelsBoolean = int_to_boolean(multipleChannelsBoolean)
+            currentTime = datetime.datetime.now()
 
             # Temporary - replace with a SQL query and do an s3id++ to increment id value by 1
             # Format to Create ID and store in MySQL: "S3_xxxxxx"
             # Upload the file to S3 and return the location it is stored in
             fileURL = str(upload_file_to_s3(file, fileName, acl="private"))
-            print(fileURL)
 
             TranscriptedFileURL = transcribe_audio_file(fileURL, fileName, fileContentType, multipleSpeakersBoolean, numberOfSpeakersInteger, multipleChannelsBoolean)
-
             # Pass the JSON response URL and the SpeakerBoolean
             # to get the SRT format returned
-            transcriptList = json_to_srt(TranscriptedFileURL, multipleSpeakersBoolean, multipleChannelsBoolean)
+            transcriptList = json_to_srt(TranscriptedFileURL, multipleSpeakersBoolean, multipleChannelsBoolean, namesToTranscribe)
             # Pass the JSON response URL and get the confidence statistics returned
             statsList = json_to_stats(TranscriptedFileURL)
 
@@ -241,21 +234,44 @@ def aws():
             transcriptData["numberOfSpeakersInteger"] = numberOfSpeakersInteger
             transcriptData["multipleChannelsBoolean"] = multipleChannelsBoolean
 
+            PrintToExcel.print_to_excel(transcriptData)
+
             # MySQL cursor to execute commands
             # Compatable with the flaskext.mysql module
             cur = mysql.get_db().cursor()
 
             # Check to see if the user exists already
             result = cur.execute("SELECT * FROM users WHERE username = %s", [userName])
+            print("Result: " + str(result))
 
             # User Does not Exist - so add to DB
             if result == 0:
                 # Execute MySQL
                 cur.execute("INSERT INTO users(username) VALUES (%s)", [userName])
                 # Commit
+
                 mysql.get_db().commit()
                 # Close connection cursor
-                cur.close()
+            # Get the UserID
+            userId = cur.execute("SELECT id FROM users WHERE username = %s", [userName])
+            userId = cur.fetchone()
+
+            cur.execute("INSERT INTO Transcripts(userID) VALUES (%s)", [userId])
+            lastRow = cur.execute("SELECT TranscriptID FROM Transcripts ORDER BY TranscriptID DESC LIMIT 1")
+            lastRow = cur.fetchone()
+            lastRow = lastRow[0]
+
+            cur.execute("UPDATE Transcripts SET filename =  '" + str(fileName) + "' WHERE TranscriptID = '" + str(lastRow) + "'")
+            cur.execute("UPDATE Transcripts SET fileDescription =  '" + str(fileDescription) + "' WHERE TranscriptID = '" + str(lastRow) + "'")
+            cur.execute("UPDATE Transcripts SET transcriptLocation =  '" + str(TranscriptedFileURL) + "' WHERE TranscriptID = '" + str(lastRow) + "'")
+            cur.execute("UPDATE Transcripts SET fileFormat =  '" + str(fileContentType) + "' WHERE TranscriptID = '" + str(lastRow) + "'")
+            cur.execute("UPDATE Transcripts SET fileLocation =  '" + str(fileURL) + "' WHERE TranscriptID = '" + str(lastRow) + "'")
+            cur.execute("UPDATE Transcripts SET numberOfSpeakers =  '" + str(numberOfSpeakersInteger) + "' WHERE TranscriptID = '" + str(lastRow) + "'")
+            cur.execute("UPDATE Transcripts SET channelIdentification =  '" + str(multipleChannelsBoolean) + "' WHERE TranscriptID = '" + str(lastRow) + "'")
+            cur.execute("UPDATE Transcripts SET transcriptionDate =  '" + str(currentTime) + "' WHERE TranscriptID = '" + str(lastRow) + "'")
+
+            mysql.get_db().commit()
+            cur.close()
 
             return(render_template('transcript.html', transcriptData=transcriptData))
         return(render_template('aws.html', form=form))
@@ -278,20 +294,16 @@ def transcribe_azure():
     return render_template('transcribe_azure.html')
 
 
-import JsonToSRT
-import JsonToSRTMultiChannel
-import JsonToStats
-
 # Convert the hard to read json response to SRT Format
 # This format will allow the user to see who spoke when
 # For more info, reference JsonToSRT.py and JsonToSRTMultiChannel.py
 # The MultiChannel and MultiSpeaker responses are different, so different methods
 #   are needed to parse them
-def json_to_srt(fileURL, multipleSpeakersBoolean, multipleChannelsBoolean):
+def json_to_srt(fileURL, multipleSpeakersBoolean, multipleChannelsBoolean, namesToTranscribe):
     jsonData = requests.get(fileURL).json()
 
     if multipleSpeakersBoolean:
-        return JsonToSRT.convertJsonToSRT(jsonData)
+        return JsonToSRT.convertJsonToSRT(jsonData, namesToTranscribe)
     elif multipleChannelsBoolean:
         return JsonToSRTMultiChannel.convertJsonToSRT(jsonData)
     else:

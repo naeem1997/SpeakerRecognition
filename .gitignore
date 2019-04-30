@@ -18,3 +18,5 @@ config.py
 env/
 source/
 bin/
+
+*.xlsx
