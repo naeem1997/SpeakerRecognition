@@ -31,8 +31,8 @@
 <hr>
 <pre id="log"></pre>
 
-<script src="speaker-recognition-api-demo-core.js"></script>
-<script src="recorder.js"></script>
+<script src="{{ url_for('static', filename = 'speaker-recognition-api-demo-core.js') }}"></script>
+<script src="{{ url_for('static', filename = 'recorder.js') }}"></script>
 <script>
 
 var recorder;
@@ -63,3 +63,5 @@ function StopListening(callback){
 </script>
  </body>
 </html>
+
+

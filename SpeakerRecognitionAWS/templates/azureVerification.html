@@ -1,0 +1,23 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+<br><br><br><br><br>
+  <div class = "apiKey">
+        <form action="demo.html" method="GET">
+           <div class="form-group">
+             <label for="verification">Paste API key in here and click "go":</label>
+             <div class="container">
+               <div class="row">
+                 <div class="col col-lg-8">
+                   <input type="text" name="key" class="form-control" id="verification" placeholder="Enter Verfication Code">
+                 </div>
+                 <div class="col-md">
+                   <button type="submit" value="go" class="btn btn-primary">Go</button>
+                 </div>
+               </div>
+             </div>
+           </div>
+        </form>
+  </div>
+
+{% endblock %}

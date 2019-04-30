@@ -1,3 +1,4 @@
+
 .audioPlayer {
   position: relative;
   top: 17px;
@@ -8,6 +9,7 @@
 .audioButtons {
   margin-left: 2%;
   margin-right: 2%;
+
 }
 
 .table-bordered {
@@ -109,3 +111,4 @@ th {
   position: relative;
   padding-top: 6%;
 }
+

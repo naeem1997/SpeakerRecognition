@@ -277,6 +277,22 @@ def aws():
         return(render_template('aws.html', form=form))
     return(render_template('aws.html', form=form))
 
+@app.route('/azure')
+def azure():
+    return render_template('azureVerification.html')
+
+@app.route('/demo.html')
+def demo():
+    return render_template('demo.html')
+
+@app.route('/recorder.js')
+def recorder():
+    return render_template('recorder.js')
+
+@app.route('/transcribe_azure.html', endpoint = "transcribe_azure.html")
+def transcribe_azure():
+    return render_template('transcribe_azure.html')
+
 
 # Convert the hard to read json response to SRT Format
 # This format will allow the user to see who spoke when
