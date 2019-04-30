@@ -25,14 +25,13 @@
 </style>
 </head>
 <body>
-	 
+
 <button onclick="enrollNewProfile();">Create Identification Profile</button>
 <button onclick="startListeningForIdentification();">Identify</button>
 <hr>
 <pre id="log"></pre>
-
-<script src="{{ url_for('static/js', filename = 'speaker-recognition-api-demo-core.js') }}"></script>
-<script src="{{ url_for('static/js', filename = 'recorder.js') }}"></script>
+<script type="text/javascript"  src="../static/js/speaker-recognition-api-demo-core.js"></script>
+<script type="text/javascript"  src="../static/js/recorder.js"></script>
 <script>
 
 var recorder;
@@ -43,7 +42,7 @@ function onMediaSuccess(stream, callback, secondsOfAudio) {
     var input = audio_context.createMediaStreamSource(stream);
     recorder = new Recorder(input);
     recorder.record();
-    
+
 	setTimeout(() => { StopListening(callback); }, secondsOfAudio*1000);
 }
 
@@ -63,5 +62,3 @@ function StopListening(callback){
 </script>
  </body>
 </html>
-
-

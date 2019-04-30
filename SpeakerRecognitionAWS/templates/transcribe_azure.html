@@ -1,172 +1,193 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Speech Sample</title>
-    <meta charset="utf-8" />
-</head>
-<body style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:13px;">
-    <div id="warning">
-        <h1 style="font-weight:500;">Speech Recognition Speech SDK not found (microsoft.cognitiveservices.speech.sdk.bundle.js missing).</h1>
-    </div>
-    <div id="content" style="display:none">
-        <table>
-            <tr>
-                <td></td>
-                <td>
-                    <h1 style="font-weight:500;">Speech Recognition- NTT Data Team 9</h1>
-                    <h2 style="font-weight:500;">Microsoft Cognitive Services</h2>
-                    <h3 style="font-weight:500"> Saman Attar <br> Kaitlyn Morris <br> Naeem Shaikh <br> Muhammad Waqas <br> Faraz Khalid </h3>
-                </td>
-            </tr>
-            <tr>
-                <td align="right"><a href="https://www.microsoft.com/cognitive-services/sign-up" target="_blank">Subscription</a>:</td>
-                <td><input id="key" type="text" size="40" value="YOUR_SPEECH_API_KEY"><b>YOUR_SPEECH_API_KEY</b></td>
-            </tr>
-            <tr>
-                <td align="right">Language:</td>
-                <td align="left">
-                    <!-- For the full list of supported languages see: https://docs.microsoft.com/azure/cognitive-services/speech-service/supported-languages -->
-                    <select id="languageOptions">
-                        <option value="ar-EG">Arabic - EG</option>
-                        <option value="ca-ES">Catalan - ES</option>
-                        <option value="da-DK">Danish - DK</option>
-                        <option value="da-DK">Danish - DK</option>
-                        <option value="de-DE">German - DE</option>
-                        <option value="en-AU">English - AU</option>
-                        <option value="en-CA">English - CA</option>
-                        <option value="en-GB">English - GB</option>
-                        <option value="en-IN">English - IN</option>
-                        <option value="en-NZ">English - NZ</option>
-                        <option value="en-US" selected="selected">English - US</option>
-                        <option value="es-ES">Spanish - ES</option>
-                        <option value="es-MX">Spanish - MX</option>
-                        <option value="fi-FI">Finnish - FI</option>
-                        <option value="fr-CA">French - CA</option>
-                        <option value="fr-FR">French - FR</option>
-                        <option value="hi-IN">Hindi - IN</option>
-                        <option value="it-IT">Italian - IT</option>
-                        <option value="ja-JP">Japanese - JP</option>
-                        <option value="ko-KR">Korean - KR</option>
-                        <option value="nb-NO">Norwegian - NO</option>
-                        <option value="nl-NL">Dutch - NL</option>
-                        <option value="pl-PL">Polish - PL</option>
-                        <option value="pt-BR">Portuguese - BR</option>
-                        <option value="pt-PT">Portuguese - PT</option>
-                        <option value="ru-RU">Russian - RU</option>
-                        <option value="sv-SE">Swedish - SE</option>
-                        <option value="zh-CN">Chinese - CN</option>
-                        <option value="zh-HK">Chinese - HK</option>
-                        <option value="zh-TW">Chinese - TW</option>
-                    </select>
-                </td>
-            </tr>
-            <tr>
-                <td align="right">Region:</td>
-                <td align="left">
-                    <select id="regionOptions">
-                        <option value="westus" selected="selected">West US</option>
-                        <option value="westus2">West US2</option>
-                        <option value="eastus">East US</option>
-                        <option value="eastus2">East US2</option>
-                        <option value="eastasia">East Asia</option>
-                        <option value="southeastasia">South East Asia</option>
-                        <option value="northeurope">North Europe</option>
-                        <option value="westeurope">West Europe</option>
-                    </select>
-                </td>
-            </tr>
-            <tr>
-                <td align="right">Format:</td>
-                <td align="left">
-                    <select id="formatOptions">
-                        <option value="Simple" selected="selected">Simple Result</option>
-                        <option value="Detailed">Detailed Result</option>
-                    </select>
-                </td>
-            </tr>
-            <tr>
-                <td align="right">Input:</td>
-                <td align="left">
-                    <select id="inputSource">
-                        <option value="Mic" selected="selected">Microphone</option>
-                        <option value="File">Audio File</option>
-                    </select>
-                </td>
-            </tr>
-            <tr>
-                <td></td>
-                <td>
-                    <input type="file" id="filePicker" accept=".wav" style="display:none" />
-                </td>
-            </tr>
-            <tr>
-                <td align="right"><b>Speech SDK API recognizeOnceAsync:</b></td>
-                <td>
-                    <button id="speechsdkStartRecognizeOnceAsync">recognizeOnceAsync()</button>
-                    <button id="speechsdkStopRecognizeOnceAsync" disabled="disabled">STOP recognizeOnceAsync()</button>
-                </td>
-            </tr>
-            <tr>
-                <td align="right"><b>Speech SDK API Continuous Speech Recognition:</b></td>
-                <td>
-                    <button id="speechsdkStartContinuousRecognition">startContinuousRecognitionAsync()</button>
-                    <button id="speechsdkStopContinuousRecognition" disabled="disabled">STOP stopContinuousRecognitionAsync()</button>
-                </td>
-            </tr>
-            <tr>
-                <td align="right"><b>Speech SDK API Translation:</b></td>
-                <td>
-                    <button id="speechsdkStartContinuousTranslation">startContinuousTranslation()</button>
-                    <button id="speechsdkStopContinuousTranslation" disabled="disabled">STOP stopContinuousTranslation()</button>
+{% extends 'layout.html' %}
 
-                    <!-- For a full list of supported languages see: https://docs.microsoft.com/azure/cognitive-services/speech-service/language-support#text-to-speech-->
-                    <select id="languageTargetOptions">
-                        <option value="Microsoft Server Speech Text to Speech Voice (ar-EG, Hoda)">Arabic - EG</option>
-                        <option value="Microsoft Server Speech Text to Speech Voice (ca-ES, HerenaRUS)">Catalan - ES</option>
-                        <option value="Microsoft Server Speech Text to Speech Voice (da-DK, HelleRUS)">Danish - DK</option>
-                        <option value="Microsoft Server Speech Text to Speech Voice (de-DE, Hedda)" selected="selected">German - DE</option>
-                        <option value="Microsoft Server Speech Text to Speech Voice (en-AU, Catherine)">English - AU</option>
-                        <option value="Microsoft Server Speech Text to Speech Voice (en-CA, Linda)">English - CA</option>
-                        <option value="Microsoft Server Speech Text to Speech Voice (en-GB, Susan, Apollo)">English - GB</option>
-                        <option value="Microsoft Server Speech Text to Speech Voice (en-IN, Heera, Apollo)">English - IN</option>
-                        <option value="Microsoft Server Speech Text to Speech Voice (en-US, ZiraRUS)">English - US</option>
-                        <option value="Microsoft Server Speech Text to Speech Voice (es-ES, Laura, Apollo)">Spanish - ES</option>
-                        <option value="Microsoft Server Speech Text to Speech Voice (es-MX, HildaRUS)">Spanish - MX</option>
-                        <option value="Microsoft Server Speech Text to Speech Voice (fi-FI, HeidiRUS)">Finnish - FI</option>
-                        <option value="Microsoft Server Speech Text to Speech Voice (fr-CA, Caroline)">French - CA</option>
-                        <option value="Microsoft Server Speech Text to Speech Voice (fr-FR, Julie, Apollo)">French - FR</option>
-                        <option value="Microsoft Server Speech Text to Speech Voice (hi-IN, Hemant)">Hindi - IN</option>
-                        <option value="Microsoft Server Speech Text to Speech Voice (it-IT, LuciaRUS)">Italian - IT</option>
-                        <option value="Microsoft Server Speech Text to Speech Voice (ja-JP, Ayumi, Apollo)">Japanese - JP</option>
-                        <option value="Microsoft Server Speech Text to Speech Voice (ko-KR, HeamiRUS)">Korean - KR</option>
-                        <option value="Microsoft Server Speech Text to Speech Voice (nb-NO, HuldaRUS)">Norwegian - NO</option>
-                        <option value="Microsoft Server Speech Text to Speech Voice (nl-NL, HannaRUS)">Dutch - NL</option>
-                        <option value="Microsoft Server Speech Text to Speech Voice (pl-PL, PaulinaRUS)">Polish - PL</option>
-                        <option value="Microsoft Server Speech Text to Speech Voice (pt-BR, HeloisaRUS)">Portuguese - BR</option>
-                        <option value="Microsoft Server Speech Text to Speech Voice (pt-PT, HeliaRUS)">Portuguese - PT</option>
-                        <option value="Microsoft Server Speech Text to Speech Voice (ru-RU, Irina, Apollo)">Russian - RU</option>
-                        <option value="Microsoft Server Speech Text to Speech Voice (sv-SE, HedvigRUS)">Swedish - SE</option>
-                        <option value="Microsoft Server Speech Text to Speech Voice (zh-CN, Kangkang, Apollo)">Chinese - CN</option>
-                        <option value="Microsoft Server Speech Text to Speech Voice (zh-HK, Tracy, Apollo)">Chinese - HK</option>
-                        <option value="Microsoft Server Speech Text to Speech Voice (zh-TW, Yating, Apollo)">Chinese - TW</option>
-                    </select>
-                    <input id="voiceOutput" type="checkbox" checked>
-                    <label for="voiceOutput">voice output</label>
-                </td>
-            </tr>
-            <tr>
-                <td align="right"><b>Speech SDK API Intent Recognition:</b></td>
-                <td>
-                    <button id="speechsdkIntentStartRecognizeOnceAsync">recognizeOnceAsync()</button>
-                    <button id="speechsdkIntentStopRecognizeOnceAsync" disabled="disabled">STOP recognizeOnceAsync()</button>
-                </td>
-            </tr>
-            <tr>
-                <td align="right">Application ID:</td>
-                <td>
-                    <input id="appId" type="text" size="60" value="YOUR_LANGUAGE_UNDERSTANDING_APP_ID">(only needed for intent recognition)
-                </td>
-            </tr>
+
+{% block body %}
+    <div id="content">
+      <br><br>    <br><br>
+        <table class="table table-hover">
+          <form>
+            <div class="form-group">
+              <div class="container">
+                <tr>
+                  <div class="row">
+                    <div class="col col-md">
+                      <label for="key">Subscription Key</label>
+                      <input type="text" class="form-control" id="key" placeholder="Your subscription key">
+                    </div>
+                  </div>
+                </tr>
+                <br>
+                <div class="row">
+                    <div class="input-group mb-6">
+                      <div class="col col-md">
+                        <label for="languageOptions">Language</label>
+                        <select class="custom-select" id="languageOptions">
+                              <option value="ar-EG">Arabic - EG</option>
+                              <option value="ca-ES">Catalan - ES</option>
+                              <option value="da-DK">Danish - DK</option>
+                              <option value="da-DK">Danish - DK</option>
+                              <option value="de-DE">German - DE</option>
+                              <option value="en-AU">English - AU</option>
+                              <option value="en-CA">English - CA</option>
+                              <option value="en-GB">English - GB</option>
+                              <option value="en-IN">English - IN</option>
+                              <option value="en-NZ">English - NZ</option>
+                              <option value="en-US" selected="selected">English - US</option>
+                              <option value="es-ES">Spanish - ES</option>
+                              <option value="es-MX">Spanish - MX</option>
+                              <option value="fi-FI">Finnish - FI</option>
+                              <option value="fr-CA">French - CA</option>
+                              <option value="fr-FR">French - FR</option>
+                              <option value="hi-IN">Hindi - IN</option>
+                              <option value="it-IT">Italian - IT</option>
+                              <option value="ja-JP">Japanese - JP</option>
+                              <option value="ko-KR">Korean - KR</option>
+                              <option value="nb-NO">Norwegian - NO</option>
+                              <option value="nl-NL">Dutch - NL</option>
+                              <option value="pl-PL">Polish - PL</option>
+                              <option value="pt-BR">Portuguese - BR</option>
+                              <option value="pt-PT">Portuguese - PT</option>
+                              <option value="ru-RU">Russian - RU</option>
+                              <option value="sv-SE">Swedish - SE</option>
+                              <option value="zh-CN">Chinese - CN</option>
+                              <option value="zh-HK">Chinese - HK</option>
+                              <option value="zh-TW">Chinese - TW</option>
+                          </select>
+                      </div>
+                    </div>
+                </div>
+                <br>
+                <div class="row">
+                  <div class="input-group mb-6">
+                    <div class="col col-md">
+                      <label for="regionOptions">Region</label>
+                      <select class="custom-select" id="regionOptions">
+                          <option value="westus" selected="selected">West US</option>
+                          <option value="westus2">West US2</option>
+                          <option value="eastus">East US</option>
+                          <option value="eastus2">East US2</option>
+                          <option value="eastasia">East Asia</option>
+                          <option value="southeastasia">South East Asia</option>
+                          <option value="northeurope">North Europe</option>
+                          <option value="westeurope">West Europe</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+                <br>
+                <div class="row">
+                  <div class="input-group mb-6">
+                    <div class="col col-md">
+                      <label for="formatOptions">Format</label>
+                      <select class="custom-select" id="formatOptions">
+                          <option value="Simple" selected="selected">Simple Result</option>
+                          <option value="Detailed">Detailed Result</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+                <br>
+                <div class="row">
+                  <div class="input-group mb-6">
+                    <div class="col col-md">
+                      <label for="inputSource">Input Source</label>
+                      <select class="custom-select" id="inputSource">
+                          <option value="Mic" selected="selected">Microphone</option>
+                          <option value="File">Audio File</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+                <br>
+                <br>
+                <div class="row">
+                  <div class="input-group mb-6">
+                    <div class="col col-md">
+                      <label for="speechsdkStartRecognizeOnceAsync"> Recognize Once Async </label>
+                      <button type="button" id="speechsdkStartRecognizeOnceAsync" class="btn btn-primary btn-sm">Start </button>
+                      <button type="button" id="speechsdkStopRecognizeOnceAsync" class="btn btn-primary btn-sm">Stop </button>
+                    </div>
+                  </div>
+                </div>
+                <br>
+                <div class="row">
+                  <div class="input-group mb-6">
+                    <div class="col col-md">
+                      <label for="speechsdkStartContinuousRecognition"> Speech SDK API Continuous Speech Recognition</label>
+                      <button type="button" id="speechsdkStartContinuousRecognition" class="btn btn-primary btn-sm">Start </button>
+                      <button type="button" id="speechsdkStopContinuousRecognition" class="btn btn-primary btn-sm">Stop </button>
+                    </div>
+                  </div>
+                </div>
+                <br>
+                <div class="row">
+                  <div class="input-group mb-6">
+                    <div class="col col-md">
+                      <label for="speechsdkStartContinuousRecognition"> Speech SDK API Intent Recognition Async</label>
+                      <button type="button" id="speechsdkIntentStartRecognizeOnceAsync" class="btn btn-primary btn-sm">Start </button>
+                      <button type="button" id="speechsdkIntentStopRecognizeOnceAsync" class="btn btn-primary btn-sm">Stop </button>
+                    </div>
+                  </div>
+                </div>
+                <br>
+                <div class="row">
+                  <div class="col col-md">
+                    <label for="key">Language Understanding App ID </label>
+                    <input type="text" class="form-control" id="appId" placeholder="(only needed for intent recognition)">
+                  </div>
+                </div>
+                <br>
+                <div class="row">
+                  <div class="input-group mb-6">
+                    <div class="col col-md">
+                      <label for="speechsdkStartContinuousTranslation"> Continuous Speech Translation</label>
+                      <div class="col col-md">
+                        <label for="languageTargetOptions">Translate To: </label>
+                        <select class="custom-select" id="languageTargetOptions">
+                          <!-- For a full list of supported languages see: https://docs.microsoft.com/azure/cognitive-services/speech-service/language-support#text-to-speech-->
+                              <option value="Microsoft Server Speech Text to Speech Voice (ar-EG, Hoda)">Arabic - EG</option>
+                              <option value="Microsoft Server Speech Text to Speech Voice (ca-ES, HerenaRUS)">Catalan - ES</option>
+                              <option value="Microsoft Server Speech Text to Speech Voice (da-DK, HelleRUS)">Danish - DK</option>
+                              <option value="Microsoft Server Speech Text to Speech Voice (de-DE, Hedda)" selected="selected">German - DE</option>
+                              <option value="Microsoft Server Speech Text to Speech Voice (en-AU, Catherine)">English - AU</option>
+                              <option value="Microsoft Server Speech Text to Speech Voice (en-CA, Linda)">English - CA</option>
+                              <option value="Microsoft Server Speech Text to Speech Voice (en-GB, Susan, Apollo)">English - GB</option>
+                              <option value="Microsoft Server Speech Text to Speech Voice (en-IN, Heera, Apollo)">English - IN</option>
+                              <option value="Microsoft Server Speech Text to Speech Voice (en-US, ZiraRUS)">English - US</option>
+                              <option value="Microsoft Server Speech Text to Speech Voice (es-ES, Laura, Apollo)">Spanish - ES</option>
+                              <option value="Microsoft Server Speech Text to Speech Voice (es-MX, HildaRUS)">Spanish - MX</option>
+                              <option value="Microsoft Server Speech Text to Speech Voice (fi-FI, HeidiRUS)">Finnish - FI</option>
+                              <option value="Microsoft Server Speech Text to Speech Voice (fr-CA, Caroline)">French - CA</option>
+                              <option value="Microsoft Server Speech Text to Speech Voice (fr-FR, Julie, Apollo)">French - FR</option>
+                              <option value="Microsoft Server Speech Text to Speech Voice (hi-IN, Hemant)">Hindi - IN</option>
+                              <option value="Microsoft Server Speech Text to Speech Voice (it-IT, LuciaRUS)">Italian - IT</option>
+                              <option value="Microsoft Server Speech Text to Speech Voice (ja-JP, Ayumi, Apollo)">Japanese - JP</option>
+                              <option value="Microsoft Server Speech Text to Speech Voice (ko-KR, HeamiRUS)">Korean - KR</option>
+                              <option value="Microsoft Server Speech Text to Speech Voice (nb-NO, HuldaRUS)">Norwegian - NO</option>
+                              <option value="Microsoft Server Speech Text to Speech Voice (nl-NL, HannaRUS)">Dutch - NL</option>
+                              <option value="Microsoft Server Speech Text to Speech Voice (pl-PL, PaulinaRUS)">Polish - PL</option>
+                              <option value="Microsoft Server Speech Text to Speech Voice (pt-BR, HeloisaRUS)">Portuguese - BR</option>
+                              <option value="Microsoft Server Speech Text to Speech Voice (pt-PT, HeliaRUS)">Portuguese - PT</option>
+                              <option value="Microsoft Server Speech Text to Speech Voice (ru-RU, Irina, Apollo)">Russian - RU</option>
+                              <option value="Microsoft Server Speech Text to Speech Voice (sv-SE, HedvigRUS)">Swedish - SE</option>
+                              <option value="Microsoft Server Speech Text to Speech Voice (zh-CN, Kangkang, Apollo)">Chinese - CN</option>
+                              <option value="Microsoft Server Speech Text to Speech Voice (zh-HK, Tracy, Apollo)">Chinese - HK</option>
+                              <option value="Microsoft Server Speech Text to Speech Voice (zh-TW, Yating, Apollo)">Chinese - TW</option>
+                          </select>
+                          <input id="voiceOutput" type="checkbox" checked>
+                          <label for="voiceOutput">voice output</label>
+                        </select>
+                      </div>
+                      <button type="button" id="speechsdkStartContinuousTranslation" class="btn btn-primary btn-sm">Start </button>
+                      <button type="button" id="speechsdkStopContinuousTranslation" class="btn btn-primary btn-sm">Stop </button>
+                    </div>
+                  </div>
+                </div>
+                <br>
+
+              </div>
+            </div>
+
             <tr>
                 <td align="right">Results:</td>
                 <td align="left">
@@ -181,7 +202,8 @@
     </div>
 
     <!-- Speech SDK REFERENCE -->
-    <script src="{{ url_for('static/js', filename = 'microsoft.cognitiveservices.speech.sdk.bundle.js') }}"></script>
+
+    <script type="text/javascript"  src="../static/js/microsoft.cognitiveservices.speech.sdk.bundle.js"></script>
 
 
     <!-- Speech Speech SDK Authorization token -->
@@ -885,19 +907,19 @@
 
             key.addEventListener("focusout", function () {
                 if (key.value === "") {
-                    key.value = "YOUR_SPEECH_API_KEY";
+                    key.value = "";
                 }
             });
 
             appId.addEventListener("focus", function () {
-                if (key.value === "YOUR_LANGUAGE_UNDERSTANDING_APP_ID") {
+                if (key.value === "") {
                     key.value = "";
                 }
             });
 
             appId.addEventListener("focusout", function () {
                 if (key.value === "") {
-                    key.value = "YOUR_LANGUAGE_UNDERSTANDING_APP_ID";
+                    key.value = "";
                 }
             });
 
@@ -926,5 +948,4 @@
             });
         });
     </script>
-</body>
-</html>
+    {% endblock %}

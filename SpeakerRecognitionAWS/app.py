@@ -263,7 +263,7 @@ def aws():
 
 @app.route('/azure')
 def azure():
-    return render_template('index.html')
+    return render_template('azureVerification.html')
 
 @app.route('/demo.html')
 def demo():
@@ -277,7 +277,7 @@ def recorder():
 def transcribe_azure():
     return render_template('transcribe_azure.html')
 
-    
+
 import JsonToSRT
 import JsonToSRTMultiChannel
 import JsonToStats
@@ -364,7 +364,7 @@ def transcribe_audio_file(objectFileURL, fileName, fileContentType, multipleSpea
           print("Error!" + str(e))
 
     TranscriptedFileURL = status['TranscriptionJob']['Transcript']['TranscriptFileUri']
-    
+
 
     return TranscriptedFileURL
 
