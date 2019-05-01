@@ -1,0 +1,62 @@
+{% extends 'layout.html' %}
+{% block body %}
+
+<div class="container-fluid" style="padding-top: 10%">
+<h1>Record Audio </h1>
+</div>
+
+{% from 'includes/_formhelpers.html' import render_field %}
+  <div>
+    <form method=post enctype=multipart/form-data>
+      <div class="row">
+        <div class="col">
+          <div class="form-group">
+            {{render_field(form.userName, id="username", class_="form-control")}}
+          </div>
+        </div>
+        <div class="col">
+          <div class="form-group" >
+            {{render_field(form.fileName, id="filename", class_="form-control")}}
+          </div>
+        </div>
+        <div class="col">
+          <div class="form-group">
+            {{render_field(form.numberOfSpeakersField, id="numberOfSpeakersField", class_="form-control")}}
+          </div>
+        </div>
+        <div class="w-100"></div>
+        <div class="col">
+          <div class="form-group">
+            {{render_field(form.fileDescription, id="fileDescription", class_="form-control")}}
+          </div>
+      </div>
+      <div class="w-100"></div>
+      <div class="col">
+        <div id="controls">
+         <button class="btn btn-danger" id="recordButton">Record</button>
+         <button class="btn btn-secondary" id="pauseButton" disabled>Pause</button>
+         <button class="btn btn-secondary" id="stopButton" disabled>Stop</button>
+        </div>
+      <div>
+      <div id="formats"></div>
+      <div class="w-100"></div>
+      <div class="col">
+        <table class="table">
+          <thead>
+            <tr>
+              <th scope="col">Recordings</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+              <ol id="recordingsList"></ol>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </form>
+  </div>
+
+{% endblock %}

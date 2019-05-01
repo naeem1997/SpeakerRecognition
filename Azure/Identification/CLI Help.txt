@@ -1,0 +1,30 @@
+Create a user profile: python Identification\CreateProfile.py <subscription_key>
+Print all user profiles: python Identification\PrintAllProfiles.py <subscription_key>
+Enroll user profiles: python Identification\EnrollProfile.py <subscription_key> <profile_id>
+ <enrollment_file_path> <force_short_audio>
+Identify test files: python Identification\IdentifyFile.py <subscription_key> <identification_file_path> <profile_ids>...
+
+
+6892b3e9442a40b38a9c84a75f0cc273
+
+
+Profile ID = 2997cb3a-cb31-4233-a1f9-5992b586f72f --> 0010_speaker1 audio flag: True
+Profile ID = 34ec3498-55cb-42d2-ad3c-e426e0b7dbef --> 0039_speaker2- audio flag: True
+
+728872b36b74400490650fe577ab5772
+
+Profile ID = 60c5cfa6-f27b-4f6f-85b0-ecad28a951b9 --> 0010 audio flag: False
+Profile ID = 3269cbca-dd1f-4cf4-ab93-374cc32b67ff --? 0038 audio flag- False
+
+Profile ID = 29a3e0af-7286-444b-8122-c15fd410bdf5 --> 0010 audio flag
+
+863e8910-0258-4af0-b847-ea65ae2d2f53
+
+
+  "identificationProfileId": "e770227b-25bb-4a8b-bd1e-2ca004af5b5a"
+
+
+728872b36b74400490650fe577ab5772
+
+Profile ID = af68c802-5b8d-4f35-9b53-e3db51dd9003 (waqas)
+Profile ID = ec364f7c-9aad-4a0b-beff-5b6570751b95 (faraz)

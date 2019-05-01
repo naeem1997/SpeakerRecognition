@@ -1,0 +1,72 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+<div class="jumbotron jumbotron-fluid">
+        <div class="container main">
+          <h1 class="display-3">Speaker Recognition System</h1>
+        </div>
+        <div class="container">
+
+          <h2>Team 9</h2>
+          <h3> Sponsored by NTT Data</h3>
+          <p> Automatic Speech Recognition (ASR) Web application designed to transcribe your audio files and identify multiple speakers and channels.
+          <br> Upload files with up to 10 speakers or a file with up to two channels.
+          <br> Select from your choice of AWS Transcribe, Azure Speech, of Google Voice to Text
+          <br> <a href="#"> Learn More </a>  </p>
+        </div>
+        <div class="container" id="howitworks">
+          <h2> How it works </h2>
+          <div class="row rowPadding">
+            <div class="col-sm">
+              <h2> - 1 - </h2>
+              <h3> Upload </h3>
+              <p> Upload or record an audio file  </p>
+            </div>
+            <div class="col-sm">
+              <h2> - 2 - </h2>
+              <h3> Data</h3>
+              <p> Add audio file metadata</p>
+            </div>
+            <div class="col-sm">
+              <h2> - 3 - </h2>
+              <h3> Transcribe</h3>
+              <p> View your transcription </p>
+            </div>
+        </div>
+
+        <div class="container transcriptionMethodsGroup">
+          <div class="row">
+            <div class="col transcriptionMethods">
+              <h2> AWS </h2>
+              <p>
+                <a class="btn btn-outline-primary"  href="/aws" role="button"> Upload File </a>
+              <p>
+              <p>
+                  <a class="btn btn-outline-primary"  href="/record" role="button"> Record Live Audio </a>
+              </p>
+            </div>
+            <div class="w-100"></div>
+            <div class="col transcriptionMethodsBottom">
+              <h2> Azure </h2>
+              <p>
+                <a class="btn btn-outline-primary" href="/transcribe_azure.html" role="button"> Transcribe</a>
+              </p>
+              <p>
+                <a class="btn btn-outline-primary" href="/azure" role="button"> Identification Profiles</a>
+              </p>
+            </div>
+            <div class="col transcriptionMethodsBottom">
+              <h2> Google </h2>
+              <p>
+                <a class="btn btn-outline-primary" href="#" role="button"> Transcribe via Google </a>
+              </p>
+            </div>
+          </div>
+        </div>
+
+</div>
+
+<script type=text/javascript>
+  $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+</script>
+{% endblock %}
