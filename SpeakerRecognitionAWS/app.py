@@ -129,7 +129,7 @@ def liveaudio():
 
             # Pass the JSON response URL and the SpeakerBoolean
             # to get the SRT format returned
-            transcriptList = json_to_srt(TranscriptedFileURL, multipleSpeakersBoolean, multipleChannelsBoolean)
+            transcriptList = json_to_srt(TranscriptedFileURL, multipleSpeakersBoolean, multipleChannelsBoolean, "")
 
             # Pass the JSON response URL and get the confidence statistics returned
             statsList = json_to_stats(TranscriptedFileURL)

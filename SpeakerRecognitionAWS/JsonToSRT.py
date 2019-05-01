@@ -24,15 +24,17 @@ def convertJsonToSRT_singleSpeaker(data):
 def convertJsonToSRT(data, listOfSpeakers):
     finalList = []
 
-    speakersMapping = {}
 
-    count = 0
-    # Map the speaker names entered by user with that in AWS Transcribe
-    for name in listOfSpeakers:
-        # Create a dynamic string based on how many names in list
-        speakerNumber = "spk_" + str(count)
-        speakersMapping[speakerNumber] = name
-        count = count + 1
+    if listOfSpeakers:
+        speakersMapping = {}
+
+        count = 0
+        # Map the speaker names entered by user with that in AWS Transcribe
+        for name in listOfSpeakers:
+            # Create a dynamic string based on how many names in list
+            speakerNumber = "spk_" + str(count)
+            speakersMapping[speakerNumber] = name
+            count = count + 1
 
 
     # Each segment begins with:
@@ -53,11 +55,13 @@ def convertJsonToSRT(data, listOfSpeakers):
             segmentList.append(" -- ")
 
             # Add the speaker
+            if listOfSpeakers:
+                convertedSpeaker = speakersMapping[str(segment['speaker_label'])]
+                segmentList.append(convertedSpeaker)
+                segmentList.append(": ")
+            else:
+                segmentList.append(str(segment['speaker_label']))
 
-            convertedSpeaker = speakersMapping[str(segment['speaker_label'])]
-            segmentList.append(convertedSpeaker)
-
-            segmentList.append(": ")
 
             # Loop through each word item to get the result
             # Reference the JSON API to see structure

@@ -148,32 +148,26 @@ function createDownloadLink(blob) {
 	//add the save to disk link to li
 	li.appendChild(link);
 
-
+	
 	//upload link
 	var upload = document.createElement('a');
 	upload.href="http://localhost:5000/liveaudio"
 	upload.className = "btn btn-danger"
 	upload.innerHTML = "Transcribe";
 	upload.addEventListener("click", function(event){
+
 		filename = document.getElementById("filename").value;
 		username = document.getElementById("username").value;
 		fileDescription = document.getElementById("fileDescription").value;
 		numberOfSpeakersField = document.getElementById("numberOfSpeakersField").value;
 		// Check to see if the radio button exists:
 		// Radio button DNE on Live Audio, Does Exist on File Upload
-		var idExists = document.getElementById("multipleChannelsRadioButton");
 
-		//Check for null, if not null -> get the value
-		// Still could be true of false
-		// For the upload file page
-		if (!idExists)
-			multipleChannelsRadioButton = document.getElementById("multipleChannelsRadioButton").value;
-		// radio button does not exists, therefore we are doing a live recording.
-		// Always False - no multiple channel capabilities yet for Live Recordig
-		else
-			multipleChannelsRadioButton = false;
+		multipleChannelsRadioButton = false;
+
 		var recording = new Blob([blob], { type: "audio/wav" });
 		var fd = new FormData();
+
 		fd.append('fileName', filename);
 		fd.append('username', username);
 		fd.append('fileDescription', fileDescription);
