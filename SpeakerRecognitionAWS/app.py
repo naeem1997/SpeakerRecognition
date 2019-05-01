@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 from __future__ import print_function
 from flask import Flask, json, request, render_template, flash, redirect, url_for, send_file
 from werkzeug.utils import secure_filename
