@@ -11,6 +11,7 @@ from flask_cors import CORS, cross_origin
 from werkzeug.datastructures import ImmutableMultiDict
 import JsonToSRT, JsonToSRTMultiChannel, JsonToStats, PrintToExcel
 
+# The boto3 SDK has all the configurations needed to connect to AWs, excpet custom keys
 s3 = boto3.client(
    "s3",
 )
@@ -23,24 +24,28 @@ CORS(app)
 
 # Initialize MYSQL
 mysql = MySQL(app)
+
+# All secret keys are stored in the config.py file
 app.config.from_pyfile('config.py')
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-#Initialize the app for use with this MySQL class
-# mysql.init_app(app)
-
+# Check to see if the filename added is in the correct format and has the correct extension
 def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
+# Convert an integer values 0 or 1 to True or False
 def int_to_boolean(intValue):
     if intValue == 1:
         return False
     else:
         return True
 
+# This function will upload the audio file to AWS S3 Bucket from the config file
+# file - contents of the file
+# filename - filename given during upload
+# acl - access rights granted
 def upload_file_to_s3(file, filename, acl):
-
     try:
         s3.upload_fileobj(
             file,
@@ -57,10 +62,15 @@ def upload_file_to_s3(file, filename, acl):
         return e
     return "{}{}".format(S3_LOCATION, filename)
 
+
+# Main Index/Homepage Route
 @app.route('/')
 def index():
     return render_template('home.html')
 
+
+# This function will upload live audio to S3
+# The content type will always be wav as that is what the Recorder.JS frameworks uses
 def upload_live_audio_to_s3(filename):
     try:
         s3.upload_file(
@@ -78,6 +88,9 @@ def upload_live_audio_to_s3(filename):
         return e
     return "{}{}".format(S3_LOCATION, filename)
 
+# This is used to convert the temporary blob file that is recieved from the AJAX call
+# into a file on the server side
+# simply copying the file data into an actual file
 def copy_filelike_to_filelike(src, dst, bufsize=16384):
     while True:
         buf = src.read(bufsize)
@@ -85,6 +98,8 @@ def copy_filelike_to_filelike(src, dst, bufsize=16384):
             break
         dst.write(buf)
 
+# This endpoint will be called by the AWS upload audio file page
+# The user can add the names of the people they expect to be talking during the conversation
 namesToTranscribe = []
 @app.route('/postNames', methods=['GET', 'POST'])
 def postNames():
@@ -104,11 +119,15 @@ def postNames():
 # I tried and tried, I couldnt get it to work without it
 # Please help
 transcriptData = {}
+# This endpoint will be called from the client AJAX call when a user hits the submit button on the live audio AWS page
+# The post method will recieve the data the user entered and store them in the TranscriptData dictironary to be used later
 @app.route('/liveaudio', methods=['GET', 'POST'])
 def liveaudio():
     if request.method == "POST":
         try:
             print("I should go first")
+
+            # Getting information from the form submitted via AJAX
             filename = str(request.form['fileName'])
             username = str(request.form['username'])
             fileDescription = str(request.form['fileDescription'])
@@ -116,11 +135,14 @@ def liveaudio():
             multipleChannelsBoolean = False
             fileContentType = "wav"
 
+            # read the file contents from the AJAX call
             file = io.BytesIO(request.files.get('data').read())
             filename = filename + ".wav"
             f = open(filename, 'wb')
+            # turn the stream into a file
             copy_filelike_to_filelike(file, f)
 
+            # Check to see how many speakers the user expects
             if numberOfSpeakersInteger < 2:
                 multipleSpeakersBoolean = False;
             else:
@@ -136,6 +158,8 @@ def liveaudio():
             # Pass the JSON response URL and get the confidence statistics returned
             statsList = json_to_stats(TranscriptedFileURL)
 
+            # Store all the gather information in this dictironary
+            # Will be passed to the frontend and parsed to display results
             transcriptData["transcript"] = transcriptList
             transcriptData["statistics"] = statsList
             transcriptData["fileName"] = filename
@@ -147,6 +171,7 @@ def liveaudio():
             transcriptData["numberOfSpeakersInteger"] = numberOfSpeakersInteger
             transcriptData["multipleChannelsBoolean"] = False
 
+            # Close and Delete file - no longer needed
             f.close()
             os.remove(filename)
         except Exception as e:
@@ -155,16 +180,18 @@ def liveaudio():
         print("I should go second")
         return(render_template('transcript.html', transcriptData=transcriptData))
 
+# This endpoint will display the form for the user for recording live audio
 @app.route("/record", methods=['GET', 'POST'])
 def record():
     form = UploadForm(request.form)
     return(render_template('record.html', form=form))
 
+# Download the transcription data
 @app.route("/download", methods=['GET', 'POST'])
 def download():
     return send_file("transcript.xlsx", as_attachment=True)
 
-
+# Main AWS Function
 @app.route('/aws', methods=['GET', 'POST'])
 def aws():
     form = UploadForm(request.form)
@@ -224,6 +251,8 @@ def aws():
             # Pass the JSON response URL and get the confidence statistics returned
             statsList = json_to_stats(TranscriptedFileURL)
 
+            # Store all the gather information in this dictironary
+            # Will be passed to the frontend and parsed to display results
             transcriptData = {}
             transcriptData["transcript"] = transcriptList
             transcriptData["statistics"] = statsList
