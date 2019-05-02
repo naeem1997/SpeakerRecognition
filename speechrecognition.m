@@ -7,7 +7,7 @@ x=voice;
 x=x';
 x=x(1,:);
 x=x';
-y1=audioread('one.wav');
+y1=audioread('OSR_us_000_0010_8k.wav');
 y1=y1';
 y1=y1(1,:);
 y1=y1';
@@ -18,7 +18,7 @@ t1=-((l1-1)/2):1:((l1-1)/2);
 t1=t1';
 %subplot(3,2,1);
 plot(t1,z1);
-y2=audioread('two.wav');
+y2=audioread('OSR_us_000_0011_8k.wav');
 y2=y2';
 y2=y2(1,:);
 y2=y2';
@@ -30,7 +30,7 @@ t2=t2';
 %subplot(3,2,2);
 figure
 plot(t2,z2);
-y3=audioread('three.wav');
+y3=audioread('OSR_us_000_0012_8k.wav');
 y3=y3';
 y3=y3(1,:);
 y3=y3';
@@ -42,7 +42,7 @@ t3=t3';
 %subplot(3,2,3);
 figure
 plot(t3,z3);
-y4=audioread('four.wav');
+y4=audioread('OSR_us_000_0013_8k.wav');
 y4=y4';
 y4=y4(1,:);
 y4=y4';
@@ -54,7 +54,7 @@ t4=t4';
 %subplot(3,2,4);
 figure
 plot(t4,z4);
-y5=audioread('five.wav');
+y5=audioread('OSR_us_000_0037_8k.wav');
 y5=y5';
 y5=y5(1,:);
 y5=y5';
@@ -71,21 +71,32 @@ a=[m1 m2 m3 m4 m5 m6];
 m=max(a);
 h=audioread('allow.wav');
 if m<=m1
-    soundsc(audioread('one.wav'),50000)
+    soundsc(audioread('OSR_us_000_0010_8k.wav'),8000)
+    pause(35)
         soundsc(h,50000)
+        f = msgbox('Successfully Matched');
 elseif m<=m2
-    soundsc(audioread('two.wav'),50000)
+    soundsc(audioread('OSR_us_000_0011_8k.wav'),8000)
+    pause(35)
         soundsc(h,50000)
+        f = msgbox('Successfully Matched');
 elseif m<=m3
-    soundsc(audioread('three.wav'),50000)
+    soundsc(audioread('OSR_us_000_0012_8k.wav'),8000)
+    pause(35)
         soundsc(h,50000)
+        f = msgbox('Successfully Matched');
 elseif m<=m4
-    soundsc(audioread('four.wav'),50000)
+    soundsc(audioread('OSR_us_000_0013_8k.wav'),8000)
+    pause(35)
         soundsc(h,50000)
+        f = msgbox('Successfully Matched');
 elseif m<m5
-    soundsc(audioread('five.wav'),50000)
+    soundsc(audioread('OSR_us_000_0037_8k.wav'),8000)
+    pause(35)
         soundsc(h,50000)
+        f = msgbox('Successfully Matched');
 else
    soundsc(audioread('denied.wav'),50000);
+   nf = msgbox('Match Unsuccessful');
    
 end
